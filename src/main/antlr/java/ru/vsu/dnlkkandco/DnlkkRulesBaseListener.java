@@ -1,4 +1,4 @@
-// Generated from D:/IdeaProjects/DnlkkScript/src/main/antlr/java/ru/vsu/dnlkkandco/DnlkkRules.g4 by ANTLR 4.13.1
+// Generated from C:/Users/user/DnlkkProjects/DnlkkScript/src/main/antlr/java/ru/vsu/dnlkkandco/DnlkkRules.g4 by ANTLR 4.13.1
 package ru.vsu.dnlkkandco;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -41,6 +41,18 @@ public class DnlkkRulesBaseListener implements DnlkkRulesListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterStmt_block(DnlkkRulesParser.Stmt_blockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStmt_block(DnlkkRulesParser.Stmt_blockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterStmt(DnlkkRulesParser.StmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -48,18 +60,6 @@ public class DnlkkRulesBaseListener implements DnlkkRulesListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitStmt(DnlkkRulesParser.StmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAssign(DnlkkRulesParser.AssignContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAssign(DnlkkRulesParser.AssignContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -89,6 +89,102 @@ public class DnlkkRulesBaseListener implements DnlkkRulesListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterFor(DnlkkRulesParser.ForContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFor(DnlkkRulesParser.ForContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReturn(DnlkkRulesParser.ReturnContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReturn(DnlkkRulesParser.ReturnContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFun(DnlkkRulesParser.FunContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFun(DnlkkRulesParser.FunContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArgs(DnlkkRulesParser.ArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArgs(DnlkkRulesParser.ArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFun_call(DnlkkRulesParser.Fun_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFun_call(DnlkkRulesParser.Fun_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArgs_call(DnlkkRulesParser.Args_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArgs_call(DnlkkRulesParser.Args_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDefinition(DnlkkRulesParser.DefinitionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDefinition(DnlkkRulesParser.DefinitionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAssign(DnlkkRulesParser.AssignContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAssign(DnlkkRulesParser.AssignContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterExpr(DnlkkRulesParser.ExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -96,6 +192,18 @@ public class DnlkkRulesBaseListener implements DnlkkRulesListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExpr(DnlkkRulesParser.ExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCompare(DnlkkRulesParser.CompareContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCompare(DnlkkRulesParser.CompareContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -137,13 +245,25 @@ public class DnlkkRulesBaseListener implements DnlkkRulesListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIdent(DnlkkRulesParser.IdentContext ctx) { }
+	@Override public void enterNumber(DnlkkRulesParser.NumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIdent(DnlkkRulesParser.IdentContext ctx) { }
+	@Override public void exitNumber(DnlkkRulesParser.NumberContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterString_literal(DnlkkRulesParser.String_literalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitString_literal(DnlkkRulesParser.String_literalContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
