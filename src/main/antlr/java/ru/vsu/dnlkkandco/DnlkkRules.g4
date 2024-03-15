@@ -23,15 +23,23 @@ definition : assign ;
 assign : IDENT '=' (expr | fun) ;
 
 // BASE
-expr : NOT_LOGICAL_OPERATOR* ((add | compare) (LOGICAL_OPERATORS NOT_LOGICAL_OPERATOR* (add | compare))*);
-compare : group COMPARE group ;
+expr : add | (NOT_LOGICAL_OPERATOR* logical);
+logical: compare (LOGICAL_OPERATORS compare)*;
+compare : add (COMPARE add)*;
 add : mult (ADD mult)* ;
 mult : group (MULT group)* ;
-group : IDENT | number | '(' expr ')' | string_literal | fun_call;
+group : IDENT | NULL | UNDEFINED | number | '(' expr ')' | string_literal | fun_call;
 
 // TYPES
 number : NUM | DOUBLE ;
 string_literal: '"' STRING* '"';
+
+//
+
+OPERATORS : ('if' | 'else' | 'while' | 'for' | 'fun') ;
+GOTO : 'continue' | 'break' ;
+LOGICAL_OPERATORS : 'or' | 'and' ;
+NOT_LOGICAL_OPERATOR : 'not';
 
 IDENT: (CHAR | '_')(CHAR | NUM | '_')* ;
 
@@ -42,13 +50,6 @@ NUM : [0-9]+ ;
 DOUBLE : [0-9]*[.][0-9]* ;
 NULL : 'null' ;
 UNDEFINED : 'undefined' ;
-
-//
-
-OPERATORS : ('if' | 'else' | 'while' | 'for' | 'fun') ;
-GOTO : 'continue' | 'break' ;
-LOGICAL_OPERATORS : 'or' | 'and' ;
-NOT_LOGICAL_OPERATOR : 'not';
 
 START_COMMENT : '<--' ;
 END_COMMENT : '-->' ;
