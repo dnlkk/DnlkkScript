@@ -12,7 +12,7 @@ for : 'for' '(' definition? ';' expr? ';' add? ')' stmt_block?;
 
 return : 'return' expr;
 
-fun : 'fun' '(' args? ')' stmt_block;
+fun : 'fun' IDENT? '(' args? ')' stmt_block;
 args : IDENT (',' IDENT)* ;
 
 fun_call : IDENT  '(' args_call? ')' ;
@@ -23,11 +23,14 @@ definition : assign ;
 assign : IDENT '=' (expr | fun) ;
 
 // BASE
-expr : add | (NOT_LOGICAL_OPERATOR* logical);
-logical: compare (LOGICAL_OPERATORS compare)*;
+expr : add | logical;
+logical: (compare|not) (LOGICAL_OPERATORS (compare|not))*;
+not: NOT_LOGICAL_OPERATOR (compare|not);
 compare : add (COMPARE add)*;
 add : mult (ADD mult)* ;
-mult : group (MULT group)* ;
+mult : (unary_minus|group) (MULT (unary_minus|group))* ;
+unary_minus : '-' (unary_plus|unary_minus|group) ;
+unary_plus : '+' (unary_plus|unary_minus|group) ;
 group : IDENT | NULL | UNDEFINED | number | '(' expr ')' | string_literal | fun_call;
 
 // TYPES
