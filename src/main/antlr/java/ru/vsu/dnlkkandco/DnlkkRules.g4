@@ -1,4 +1,4 @@
-grammar LexerRules;
+grammar DnlkkRules;
 
 program : stmt_list ;
 stmt_list : stmt* ;
