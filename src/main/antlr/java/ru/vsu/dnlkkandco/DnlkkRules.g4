@@ -31,10 +31,9 @@ add : mult (ADD mult)* ;
 mult : (unary_minus|group) (MULT (unary_minus|group))* ;
 unary_minus : '-' (unary_plus|unary_minus|group) ;
 unary_plus : '+' (unary_plus|unary_minus|group) ;
-group : IDENT | NULL | UNDEFINED | number | '(' expr ')' | string_literal | fun_call;
+group : IDENT | NULL | UNDEFINED | BOOL | NUM | DOUBLE | '(' expr ')' | string_literal | fun_call;
 
 // TYPES
-number : NUM | DOUBLE ;
 string_literal: '"' STRING* '"';
 
 //
@@ -51,6 +50,7 @@ CHAR : ([a-z] | [A-Z]) ;
 STRING : (CHAR)+;
 NUM : [0-9]+ ;
 DOUBLE : [0-9]*[.][0-9]* ;
+BOOL : 'false' | 'true' ;
 NULL : 'null' ;
 UNDEFINED : 'undefined' ;
 
