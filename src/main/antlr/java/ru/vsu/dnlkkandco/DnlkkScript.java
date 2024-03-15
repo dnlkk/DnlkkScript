@@ -2,11 +2,14 @@ package ru.vsu.dnlkkandco;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
-import ru.vsu.dnlkkandco.DnlkkRulesLexer;
-import ru.vsu.dnlkkandco.DnlkkRulesParser;
+import ru.vsu.dnlkkandco.gen.DnlkkRulesLexer;
+import ru.vsu.dnlkkandco.gen.DnlkkRulesParser;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+
+import static ru.vsu.dnlkkandco.Parser.parseTree;
+import static ru.vsu.dnlkkandco.Parser.printTree;
 
 public class DnlkkScript {
     public static void main(String[] args) throws IOException {
@@ -21,6 +24,7 @@ public class DnlkkScript {
         DnlkkRulesParser parser = new DnlkkRulesParser(tokens);
 
         ParseTree tree = parser.program();
-        System.out.println(tree.toStringTree(parser));
+        Node treeNode = parseTree(tree.toStringTree(parser));
+        printTree(treeNode, 0, true);
     }
 }
