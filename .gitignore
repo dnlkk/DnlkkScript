@@ -4,6 +4,7 @@
 .idea
 *.iml
 target
+gen
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
