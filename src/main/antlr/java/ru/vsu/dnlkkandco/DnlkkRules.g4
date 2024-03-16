@@ -6,9 +6,9 @@ stmt_block : '{' stmt_list '}' ;
 stmt : definition | assign | expr | compare | if | while | for | fun | return | GOTO | fun_call;
 
 // OPERATORS
-if : 'if' '(' expr ')' stmt_block (('elif' '(' expr ')' stmt_block)* ('else' stmt_block)?)? ;
-while : 'while' '(' expr ')' stmt_block? ;
-for : 'for' '(' definition? ';' expr? ';' add? ')' stmt_block?;
+if : 'if' '(' logical ')' stmt_block (('elif' '(' expr ')' stmt_block)* ('else' stmt_block)?)? ;
+while : 'while' '(' logical ')' stmt_block? ;
+for : 'for' '(' definition? ';' logical? ';' add? ')' stmt_block?;
 
 return : 'return' expr;
 
