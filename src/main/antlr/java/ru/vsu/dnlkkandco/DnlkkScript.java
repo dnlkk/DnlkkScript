@@ -24,7 +24,9 @@ public class DnlkkScript {
         DnlkkRulesParser parser = new DnlkkRulesParser(tokens);
 
         ParseTree tree = parser.program();
-        Node treeNode = parseTree(tree.toStringTree(parser));
-        printTree(treeNode, 0, true);
+        System.out.println(tree.getChild(0).getPayload());
+//        Node treeNode = parseTree(tree.toStringTree(parser));
+//        System.out.println(tree.toStringTree(parser));
+//        printTree(treeNode, 0, true);
     }
 }
