@@ -29,10 +29,13 @@ not: NOT_LOGICAL_OPERATOR (compare|not);
 compare : add (COMPARE add)*;
 add : mult (ADD mult)* ;
 mult : group (MULT group)* ;
-group : IDENT | NULL | UNDEFINED | BOOL | NUM | DOUBLE | '(' expr ')' | string_literal | fun_call;
+group : IDENT | NULL | UNDEFINED | BOOL | NUM | DOUBLE | STRING_LITERAL | '(' expr ')' | array_literal | object_literal | fun_call;
 
 // TYPES
-string_literal: '"' STRING* '"';
+STRING_LITERAL: '"' STRING* '"';
+array_literal: '[' ((expr | fun) ','?)* ']';
+object_literal: '{' (field ','?)* '}';
+field: IDENT ':' (expr | fun);
 
 //
 
