@@ -19,7 +19,7 @@ fun_call : IDENT  '(' args_call? ')' ;
 args_call : expr (',' expr)* ;
 
 
-definition : assign ;
+definition : 'var' assign ;
 assign : IDENT '=' (expr | fun) ;
 
 // BASE
