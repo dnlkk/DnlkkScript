@@ -28,9 +28,7 @@ logical: (compare|not) (LOGICAL_OPERATORS (compare|not))*;
 not: NOT_LOGICAL_OPERATOR (compare|not);
 compare : add (COMPARE add)*;
 add : mult (ADD mult)* ;
-mult : (unary_minus|group) (MULT (unary_minus|group))* ;
-unary_minus : '-' (unary_plus|unary_minus|group) ;
-unary_plus : '+' (unary_plus|unary_minus|group) ;
+mult : group (MULT group)* ;
 group : IDENT | NULL | UNDEFINED | BOOL | NUM | DOUBLE | '(' expr ')' | string_literal | fun_call;
 
 // TYPES
