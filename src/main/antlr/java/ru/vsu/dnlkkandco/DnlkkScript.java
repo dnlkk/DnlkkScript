@@ -24,7 +24,26 @@ public class DnlkkScript {
         DnlkkRulesParser parser = new DnlkkRulesParser(tokens);
 
         ParseTree tree = parser.program();
-        Node treeNode = parseTree(tree.toStringTree(parser));
-        printTree(treeNode, 0, true);
+        treeView(tree, 0);
+//        Node treeNode = parseTree(tree.toStringTree(parser));
+//        printTree(treeNode, 0, true);
+    }
+
+    static void treeView(ParseTree tree, int level) {
+//        "└── " : "├── "
+        String out = "\t".repeat(level);
+        if (tree.getChildCount() == 0) {
+            out += tree.getText();
+        } else {
+            String className = tree.getClass().toString();
+            int nodeIndexBegin = className.indexOf('$') + 1;
+            int nodeIndexEnd = className.indexOf("Context");
+            String nodeName = className.substring(nodeIndexBegin, nodeIndexEnd);
+            out += nodeName;
+        }
+        System.out.println(out);
+        for (int i = 0; i < tree.getChildCount(); i++) {
+            treeView(tree.getChild(i), level + 1);
+        }
     }
 }
