@@ -1,9 +1,9 @@
 grammar DnlkkRules;
 
-program : stmt_list ;
+program : stmt_list EOF;
 stmt_list : stmt* ;
-stmt_block : '{' stmt_list '}' ;
-stmt : definition | assign | expr | compare | if | while | for | fun | return | GOTO | fun_call;
+stmt_block : '{' ENDL? stmt_list '}' ENDL? ;
+stmt : (definition | assign | expr | compare | if | while | for | fun | return | GOTO | fun_call) ENDL;
 
 // OPERATORS
 if : 'if' '(' logical ')' stmt_block (('elif' '(' expr ')' stmt_block)* ('else' stmt_block)?)? ;
@@ -63,5 +63,6 @@ COMPARE : '>' | '<' | '>=' | '<=' | '==' | '!=' ;
 ADD : '+' | '-' ;
 MULT : '*' | '/' | '//' | '/%' ;
 
+ENDL : '\r''\n' | '\n' ;
 WS : [ \t] -> skip ;
 COMMENT : (START_COMMENT ' '* STRING* END_COMMENT?) -> skip  ;
