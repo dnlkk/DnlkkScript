@@ -1,25 +1,25 @@
 grammar DnlkkRules;
 
-program : stmt_list ;
+program : stmt_list EOF;
 stmt_list : stmt* ;
-stmt_block : '{' stmt_list '}' ;
+stmt_block : '{'stmt_list '}';
 stmt : definition | assign | expr | compare | if | while | for | fun | return | GOTO | fun_call;
 
 // OPERATORS
-if : 'if' '(' expr ')' stmt_block (('elif' '(' expr ')' stmt_block)* ('else' stmt_block)?)? ;
-while : 'while' '(' expr ')' stmt_block? ;
-for : 'for' '(' definition? ';' expr? ';' add? ')' stmt_block?;
+if : 'if' '(' logical ')' stmt_block (('elif' '(' expr ')' stmt_block)* ('else' stmt_block)?)? ;
+while : 'while' '(' logical ')' stmt_block? ;
+for : 'for' '(' definition? ';' logical? ';' add? ')' stmt_block?;
 
 return : 'return' expr;
 
 fun : 'fun' IDENT? '(' args? ')' stmt_block;
 args : IDENT (',' IDENT)* ;
 
-fun_call : IDENT  '(' args_call? ')' ;
+fun_call : ( IDENT | fun) | fun_call '(' args_call? ')' ;
 args_call : expr (',' expr)* ;
 
 
-definition : assign ;
+definition : 'var' assign ;
 assign : IDENT '=' (expr | fun) ;
 
 // BASE
@@ -28,13 +28,14 @@ logical: (compare|not) (LOGICAL_OPERATORS (compare|not))*;
 not: NOT_LOGICAL_OPERATOR (compare|not);
 compare : add (COMPARE add)*;
 add : mult (ADD mult)* ;
-mult : (unary_minus|group) (MULT (unary_minus|group))* ;
-unary_minus : '-' (unary_plus|unary_minus|group) ;
-unary_plus : '+' (unary_plus|unary_minus|group) ;
-group : IDENT | NULL | UNDEFINED | BOOL | NUM | DOUBLE | '(' expr ')' | string_literal | fun_call;
+mult : group (MULT group)* ;
+group : IDENT | NULL | UNDEFINED | BOOL | NUM | DOUBLE | STRING_LITERAL | '(' expr ')' | array_literal | object_literal | fun_call;
 
 // TYPES
-string_literal: '"' STRING* '"';
+STRING_LITERAL: '"' STRING* '"';
+array_literal: '[' ((expr | fun) ','?)* ']';
+object_literal: '{' (field ','?)* '}';
+field: IDENT ':' (expr | fun);
 
 //
 
@@ -62,5 +63,5 @@ COMPARE : '>' | '<' | '>=' | '<=' | '==' | '!=' ;
 ADD : '+' | '-' ;
 MULT : '*' | '/' | '//' | '/%' ;
 
-WS : [ \t] -> skip ;
+WS : [ \t\r\n] -> skip ;
 COMMENT : (START_COMMENT ' '* STRING* END_COMMENT?) -> skip  ;
