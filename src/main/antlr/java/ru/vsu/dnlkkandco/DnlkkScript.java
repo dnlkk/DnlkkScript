@@ -24,26 +24,34 @@ public class DnlkkScript {
         DnlkkRulesParser parser = new DnlkkRulesParser(tokens);
 
         ParseTree tree = parser.program();
-        treeView(tree, 0);
+        String result = treeView(tree);
+        System.out.println(result);
 //        Node treeNode = parseTree(tree.toStringTree(parser));
 //        printTree(treeNode, 0, true);
     }
 
-    static void treeView(ParseTree tree, int level) {
-//        "└── " : "├── "
-        String out = "\t".repeat(level);
+    static String treeView(ParseTree tree) {
+        return treeViewInner(tree, new StringBuffer(), "", "", "").toString();
+    }
+
+    static StringBuffer treeViewInner(ParseTree tree, StringBuffer out, String prevPrefix, String prefixLine, String prefixNode) {
+        String line = prevPrefix + prefixNode;
         if (tree.getChildCount() == 0) {
-            out += tree.getText();
+            line += tree.getText();
         } else {
             String className = tree.getClass().toString();
             int nodeIndexBegin = className.indexOf('$') + 1;
             int nodeIndexEnd = className.indexOf("Context");
             String nodeName = className.substring(nodeIndexBegin, nodeIndexEnd);
-            out += nodeName;
+            line += nodeName;
         }
-        System.out.println(out);
+        out.append(line).append('\n');
         for (int i = 0; i < tree.getChildCount(); i++) {
-            treeView(tree.getChild(i), level + 1);
+            boolean last = i == tree.getChildCount() - 1;
+            String nextLevelPrefix = last ? "  " : "│ ";
+            String nodePrefix = last ? "└─" : "├─";
+            treeViewInner(tree.getChild(i), out, prevPrefix + prefixLine, nextLevelPrefix, nodePrefix);
         }
+        return out;
     }
 }
