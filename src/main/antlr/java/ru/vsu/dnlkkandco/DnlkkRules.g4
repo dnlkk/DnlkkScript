@@ -15,7 +15,7 @@ return : 'return' expr;
 fun : 'fun' IDENT? '(' args? ')' stmt_block;
 args : IDENT (',' IDENT)* ;
 
-fun_call : IDENT  '(' args_call? ')' ;
+fun_call : (IDENT | fun) ('(' args_call? ')')+ ;
 args_call : expr (',' expr)* ;
 
 
