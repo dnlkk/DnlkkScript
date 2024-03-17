@@ -99,8 +99,59 @@ class FunctionCallNode extends AstNode {
 class FunctionDefinitionNode extends AstNode {
     public FunctionDefinitionNode(TerminalAstNode funIdent, List<AstNode> args, BlockNode body) {
         super("def " + (funIdent == null ? "<Anonymous>" : funIdent.getName()));
-        children.add(funIdent);
+        children.add(funIdent == null ? new TerminalAstNode("<Anonymous>") : funIdent);
         children.addAll(args);
         children.add(body);
     }
 }
+
+//class ArrayLiteralNode extends AstNode {
+//    public ArrayLiteralNode() {
+//        super();
+//    }
+//}
+
+class ObjectLiteralNode extends AstNode {
+    public ObjectLiteralNode(List<AstNode> fields) {
+        super("obj_def");
+        children.addAll(fields);
+    }
+}
+//
+class FieldNode extends AstNode {
+    public FieldNode(AstNode fieldName, AstNode value) {
+        super("field");
+        children.add(fieldName);
+        children.add(value);
+    }
+}
+//
+//class AssignNode extends AstNode {
+//    public AssignNode() {
+//        super();
+//    }
+//}
+//
+//class IfNode extends AstNode {
+//    public IfNode() {
+//        super("if " + );
+//    }
+//}
+//
+//class WhileNode extends AstNode {
+//    public WhileNode() {
+//        super();
+//    }
+//}
+//
+//class ForNode extends AstNode {
+//    public ForNode() {
+//        super();
+//    }
+//}
+//
+//class ReturnNode extends AstNode {
+//    public ReturnNode() {
+//        super();
+//    }
+//}
