@@ -6,7 +6,7 @@ stmt_block : '{'stmt_list '}';
 stmt : definition | assign | expr | compare | if | while | for | fun | return | GOTO;
 
 // OPERATORS
-if : 'if' '(' logical ')' stmt_block (('elif' '(' expr ')' stmt_block)* ('else' stmt_block)?)? ;
+if : 'if' '(' logical ')' stmt_block ('elif' '(' expr ')' stmt_block)* ('else' stmt_block)? ;
 while : 'while' '(' logical ')' stmt_block? ;
 for : 'for' '(' definition? ';' logical? ';' add? ')' stmt_block?;
 
@@ -24,18 +24,53 @@ assign : IDENT '=' (expr | fun) ;
 
 // BASE
 expr : logical;
-logical: compare (LOGICAL_OPERATORS compare)*;
-not: NOT_LOGICAL_OPERATOR not | compare;
-compare : add (COMPARE add)*;
-add : mult (ADD mult)* ;
-mult : unary (MULT unary)* ;
-unary: (ADD | MULT) unary | group ;
+logical
+    : compare
+    | logical LOGICAL_OPERATORS compare
+    ;
+not
+    : compare
+    | NOT_LOGICAL_OPERATOR not
+    ;
+compare
+    : add
+    | compare COMPARE add
+    ;
+add
+    : mult
+    | add ADD mult
+    ;
+mult
+    : unary
+    | mult MULT unary
+    ;
+unary
+    : group
+    | ADD unary
+    | MULT unary
+    ;
 //mult : (unary_minus|group) (MULT (unary_minus|group))* ;
 //unary_minus : '-' (unary_plus|unary_minus|group) ;
 //unary_plus : '+' (unary_plus|unary_minus|group) ;
-group : object_call | primitive;
-primitive : NULL | UNDEFINED | BOOL | NUM | DOUBLE | STRING_LITERAL ;
-object : IDENT | array_literal | object_literal | fun_call | ('(' expr ')');
+group
+    : object_call
+    | primitive
+    ;
+primitive
+    : NULL
+    | UNDEFINED
+    | BOOL
+    | NUM
+    | DOUBLE
+    | STRING_LITERAL
+    ;
+object
+    : IDENT
+    | array_literal
+    | object_literal
+    | fun_call
+    | '(' expr ')'
+    ;
 array_call : object ('[' (object | primitive) ']')*;
 object_call : array_call ('.' group)?;
 
