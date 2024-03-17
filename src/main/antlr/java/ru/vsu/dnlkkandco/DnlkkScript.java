@@ -24,7 +24,8 @@ public class DnlkkScript {
         DnlkkRulesParser parser = new DnlkkRulesParser(tokens);
 
         ParseTree tree = parser.program();
-        String result = treeView(tree);
+        AstNode node = tree.accept(new AstBuilderVisitor());
+        String result = treeViewAst(node);
         System.out.println(result);
 //        Node treeNode = parseTree(tree.toStringTree(parser));
 //        printTree(treeNode, 0, true);
@@ -51,6 +52,23 @@ public class DnlkkScript {
             String nextLevelPrefix = last ? "  " : "│ ";
             String nodePrefix = last ? "└─" : "├─";
             treeViewInner(tree.getChild(i), out, prevPrefix + prefixLine, nextLevelPrefix, nodePrefix);
+        }
+        return out;
+    }
+
+    static String treeViewAst(AstNode tree) {
+        return treeViewAstInner(tree, new StringBuffer(), "", "", "").toString();
+    }
+
+    static StringBuffer treeViewAstInner(AstNode tree, StringBuffer out, String prevPrefix, String prefixLine, String prefixNode) {
+        String line = prevPrefix + prefixNode + tree.getName();
+
+        out.append(line).append('\n');
+        for (int i = 0; i < tree.getChildrenAmount(); i++) {
+            boolean last = i == tree.getChildrenAmount() - 1;
+            String nextLevelPrefix = last ? "  " : "│ ";
+            String nodePrefix = last ? "└─" : "├─";
+            treeViewAstInner(tree.getChild(i), out, prevPrefix + prefixLine, nextLevelPrefix, nodePrefix);
         }
         return out;
     }
