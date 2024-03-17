@@ -1,8 +1,8 @@
 grammar DnlkkRules;
 
 program : stmt_list EOF;
-stmt_list : (stmt EOL+)* ;
-stmt_block : '{' stmt_list '}';
+stmt_list : stmt (EOL+ stmt)* EOL*;
+stmt_block : EOL* '{' EOL* stmt_list EOL* '}' EOL*;
 stmt
     : definition
     | assign
@@ -17,13 +17,13 @@ stmt
     ;
 
 // OPERATORS
-if : 'if' '(' logical ')' stmt_block ('elif' '(' expr ')' stmt_block)* ('else' stmt_block)? ;
-while : 'while' '(' logical ')' stmt_block? ;
-for : 'for' '(' definition? ';' logical? ';' add? ')' stmt_block?;
+if : IF '(' logical ')' stmt_block (ELIF '(' expr ')' stmt_block)* (ELSE stmt_block)? ;
+while : WHILE '(' logical ')' stmt_block? ;
+for : FOR '(' definition? ';' logical? ';' add? ')' stmt_block? ;
 
-return : 'return' expr;
+return : RETURN expr ;
 
-fun : 'fun' IDENT? '(' args? ')' stmt_block;
+fun : FUN IDENT? '(' args? ')' stmt_block ;
 args : IDENT (',' IDENT)* ;
 
 fun_call
@@ -32,7 +32,6 @@ fun_call
     | fun_call '(' args_call? ')'
     ;
 args_call : expr (',' expr)* ;
-
 
 definition : 'var' assign ;
 assign : IDENT '=' (expr | fun) ;
@@ -60,9 +59,14 @@ mult
     | mult MULT unary
     ;
 unary
-    : group
+    : call
     | ADD unary
     | MULT unary
+    ;
+call
+    : group
+    | call '.' IDENT
+    | call '[' expr ']'
     ;
 group
     : NULL
@@ -73,31 +77,10 @@ group
     | STRING_LITERAL
     | IDENT
     | fun_call
-//    | array_call
-//    | object_call
     | array_literal
     | object_literal
     | '(' expr ')'
     ;
-//group
-//    : object_call
-//    | primitive
-//    ;
-//primitive
-//    : NULL
-//    | UNDEFINED
-//    | BOOL
-//    | NUM
-//    | DOUBLE
-//    | STRING_LITERAL
-//    ;
-//object
-//    : IDENT
-//    | array_literal
-//    | object_literal
-//    | fun_call
-//    | '(' expr ')'
-//    ;
 
 // TYPES
 STRING_LITERAL: '"' STRING* '"';
@@ -106,7 +89,13 @@ object_literal: '{' (field ','?)* '}';
 field: IDENT ':' (expr | fun);
 //
 
-OPERATORS : ('if' | 'else' | 'while' | 'for' | 'fun') ;
+IF: 'if' ;
+ELIF : 'elif' ;
+ELSE : 'else' ;
+WHILE : 'while' ;
+FOR : 'for' ;
+RETURN : 'return' ;
+FUN : 'fun' ;
 GOTO : 'continue' | 'break' ;
 LOGICAL_OPERATORS : 'or' | 'and' ;
 NOT_LOGICAL_OPERATOR : 'not';
