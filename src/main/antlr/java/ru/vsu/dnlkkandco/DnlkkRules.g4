@@ -2,8 +2,19 @@ grammar DnlkkRules;
 
 program : stmt_list EOF;
 stmt_list : (stmt EOL+)* ;
-stmt_block : '{'stmt_list '}';
-stmt : definition | assign | expr | compare | if | while | for | fun | return | GOTO;
+stmt_block : '{' stmt_list '}';
+stmt
+    : definition
+    | assign
+    | expr
+    | compare
+    | if
+    | while
+    | for
+    | fun
+    | return
+    | GOTO
+    ;
 
 // OPERATORS
 if : 'if' '(' logical ')' stmt_block ('elif' '(' expr ')' stmt_block)* ('else' stmt_block)? ;
