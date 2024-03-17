@@ -24,7 +24,8 @@ public class DnlkkScript {
         DnlkkRulesParser parser = new DnlkkRulesParser(tokens);
 
         ParseTree tree = parser.program();
-        String result = treeView(tree);
+        AstNode node = tree.accept(new AstBuilderVisitor());
+        String result = treeViewAst(node);
         System.out.println(result);
 //        Node treeNode = parseTree(tree.toStringTree(parser));
 //        printTree(treeNode, 0, true);

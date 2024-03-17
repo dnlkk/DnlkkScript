@@ -41,33 +41,30 @@ assign : IDENT '=' (expr | fun) ;
 expr : logical;
 logical
     : compare
-    | logical LOGICAL_OPERATORS compare
-    ;
-not
-    : compare
-    | NOT_LOGICAL_OPERATOR not
+    | NOT_LOGICAL_OPERATOR not_operand=logical
+    | left=logical LOGICAL_OPERATORS right=logical
     ;
 compare
     : add
-    | compare COMPARE add
+    | left=compare COMPARE right=compare
     ;
 add
     : mult
-    | add ADD mult
+    | left=add ADD right=add
     ;
 mult
     : unary
-    | mult MULT unary
+    | left=mult MULT right=mult
     ;
 unary
     : call
-    | ADD unary
-    | MULT unary
+    | ADD unary_add_operand=unary
+    | MULT unary_mult_operand=unary
     ;
 call
     : group
-    | call '.' IDENT
-    | call '[' expr ']'
+    | object=call '.' IDENT
+    | array=call '[' expr ']'
     ;
 group
     : NULL

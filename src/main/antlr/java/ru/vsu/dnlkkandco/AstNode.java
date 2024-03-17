@@ -33,8 +33,8 @@ public abstract class AstNode {
     }
 }
 
-class TerminalNode extends AstNode {
-    public TerminalNode(String name) {
+class TerminalAstNode extends AstNode {
+    public TerminalAstNode(String name) {
         super(name);
     }
 }
@@ -55,5 +55,28 @@ class BinOpNode extends AstNode {
         super(op);
         children.add(left);
         children.add(right);
+    }
+}
+
+class UnaryOpNode extends AstNode {
+    public UnaryOpNode(String op, AstNode child) {
+        super(op);
+        children.add(child);
+    }
+}
+
+class ObjectCallNode extends AstNode {
+    public ObjectCallNode(AstNode obj, AstNode field) {
+        super(".");
+        children.add(obj);
+        children.add(field);
+    }
+}
+
+class ArrayCallNode extends AstNode {
+    public ArrayCallNode(AstNode obj, AstNode field) {
+        super("[]");
+        children.add(obj);
+        children.add(field);
     }
 }
