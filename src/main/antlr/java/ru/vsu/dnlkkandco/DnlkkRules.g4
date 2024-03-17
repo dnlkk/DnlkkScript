@@ -1,13 +1,12 @@
 grammar DnlkkRules;
 
-program : stmt_list EOF;
+program : stmt_list? EOF;
 stmt_list : stmt (EOL+ stmt)* EOL*;
 stmt_block : EOL* '{' EOL* stmt_list EOL* '}' EOL*;
 stmt
     : definition
     | assign
     | expr
-    | compare
     | if
     | while
     | for
@@ -17,8 +16,10 @@ stmt
     ;
 
 // OPERATORS
-if : IF '(' logical ')' stmt_block (ELIF '(' expr ')' stmt_block)* (ELSE stmt_block)? ;
-while : WHILE '(' logical ')' stmt_block? ;
+if : IF '(' expr ')' stmt_block elif* else? ;
+elif : ELIF '(' expr ')' stmt_block ;
+else : ELSE stmt_block ;
+while : WHILE '(' expr ')' stmt_block? ;
 for : FOR '(' definition? ';' logical? ';' add? ')' stmt_block? ;
 
 return : RETURN expr ;
