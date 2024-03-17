@@ -16,6 +16,10 @@ public abstract class AstNode {
         return name;
     }
 
+    public int getChildrenAmount() {
+        return children.size();
+    }
+
     public AstNode getChild(int i) {
         return children.get(i);
     }

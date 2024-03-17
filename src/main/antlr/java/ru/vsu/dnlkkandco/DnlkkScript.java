@@ -54,4 +54,21 @@ public class DnlkkScript {
         }
         return out;
     }
+
+    static String treeViewAst(AstNode tree) {
+        return treeViewAstInner(tree, new StringBuffer(), "", "", "").toString();
+    }
+
+    static StringBuffer treeViewAstInner(AstNode tree, StringBuffer out, String prevPrefix, String prefixLine, String prefixNode) {
+        String line = prevPrefix + prefixNode + tree.getName();
+
+        out.append(line).append('\n');
+        for (int i = 0; i < tree.getChildrenAmount(); i++) {
+            boolean last = i == tree.getChildrenAmount() - 1;
+            String nextLevelPrefix = last ? "  " : "│ ";
+            String nodePrefix = last ? "└─" : "├─";
+            treeViewAstInner(tree.getChild(i), out, prevPrefix + prefixLine, nextLevelPrefix, nodePrefix);
+        }
+        return out;
+    }
 }
