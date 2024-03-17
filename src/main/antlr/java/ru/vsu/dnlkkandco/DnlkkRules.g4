@@ -2,7 +2,7 @@ grammar DnlkkRules;
 
 program : stmt_list? EOF;
 stmt_list : stmt (EOL+ stmt)* EOL*;
-stmt_block : EOL* '{' EOL* stmt_list EOL* '}' EOL*;
+stmt_block : EOL* '{' EOL* stmt_list? EOL* '}' EOL*;
 stmt
     : definition
     | assign
@@ -24,15 +24,13 @@ for : FOR '(' definition? ';' logical? ';' add? ')' stmt_block? ;
 
 return : RETURN expr ;
 
-fun : FUN IDENT? '(' args? ')' stmt_block ;
-args : IDENT (',' IDENT)* ;
+fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
 
 fun_call
     : IDENT
     | fun
-    | fun_call '(' args_call? ')'
+    | fun_call '(' (expr (',' expr)*)? ')'
     ;
-args_call : expr (',' expr)* ;
 
 definition : 'var' assign ;
 assign : IDENT '=' (expr | fun) ;

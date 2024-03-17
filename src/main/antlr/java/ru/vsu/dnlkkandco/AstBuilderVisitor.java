@@ -6,7 +6,6 @@ import ru.vsu.dnlkkandco.gen.DnlkkRulesParser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     @Override
@@ -127,6 +126,37 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
 
         if (ctx.expr() != null)
             return visitExpr(ctx.expr());
+        if (ctx.fun_call() != null)
+            return visitFun_call(ctx.fun_call());
         throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
+    public AstNode visitFun_call(DnlkkRulesParser.Fun_callContext ctx) {
+        if (ctx.IDENT() != null)
+            return new TerminalAstNode(ctx.IDENT().getText());
+        if (ctx.fun() != null)
+            return visitFun(ctx.fun());
+
+        AstNode func = visitFun_call(ctx.fun_call());
+        List<AstNode> args = new ArrayList<>();
+        for (var arg : ctx.expr())
+            args.add(visitExpr(arg));
+        return new FunctionCallNode(func, args);
+    }
+
+    @Override
+    public AstNode visitFun(DnlkkRulesParser.FunContext ctx) {
+        TerminalAstNode funIdent = ctx.fun_ident == null ? null : new TerminalAstNode(ctx.fun_ident.getText());
+        List<AstNode> args = new ArrayList<>();
+        for (int i = 1; i < ctx.IDENT().size(); i++)
+            args.add(new TerminalAstNode(ctx.IDENT(i).getText()));
+
+        List<AstNode> stmts = new ArrayList<>();
+        if (ctx.stmt_block().stmt_list() != null)
+            for (var stmt : ctx.stmt_block().stmt_list().stmt())
+                stmts.add(visitStmt(stmt));
+        BlockNode body = new BlockNode(stmts);
+        return new FunctionDefinitionNode(funIdent, args, body);
     }
 }

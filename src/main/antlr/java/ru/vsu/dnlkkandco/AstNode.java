@@ -50,6 +50,13 @@ class ProgramNode extends AstNode {
     }
 }
 
+class BlockNode extends AstNode {
+    public BlockNode(List<AstNode> stmts) {
+        super("...");
+        children.addAll(stmts);
+    }
+}
+
 class BinOpNode extends AstNode {
     public BinOpNode(String op, AstNode left, AstNode right) {
         super(op);
@@ -78,5 +85,22 @@ class ArrayCallNode extends AstNode {
         super("[]");
         children.add(obj);
         children.add(field);
+    }
+}
+
+class FunctionCallNode extends AstNode {
+    public FunctionCallNode(AstNode func, List<AstNode> args) {
+        super("call");
+        children.add(func);
+        children.addAll(args);
+    }
+}
+
+class FunctionDefinitionNode extends AstNode {
+    public FunctionDefinitionNode(TerminalAstNode funIdent, List<AstNode> args, BlockNode body) {
+        super("def " + (funIdent == null ? "<Anonymous>" : funIdent.getName()));
+        children.add(funIdent);
+        children.addAll(args);
+        children.add(body);
     }
 }
