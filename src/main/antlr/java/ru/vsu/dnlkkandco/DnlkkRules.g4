@@ -49,30 +49,40 @@ unary
     | ADD unary
     | MULT unary
     ;
-//mult : (unary_minus|group) (MULT (unary_minus|group))* ;
-//unary_minus : '-' (unary_plus|unary_minus|group) ;
-//unary_plus : '+' (unary_plus|unary_minus|group) ;
 group
-    : object_call
-    | primitive
-    ;
-primitive
     : NULL
     | UNDEFINED
     | BOOL
     | NUM
     | DOUBLE
     | STRING_LITERAL
-    ;
-object
-    : IDENT
+    | IDENT
+    | fun_call
+//    | array_call
+//    | object_call
     | array_literal
     | object_literal
-    | fun_call
     | '(' expr ')'
     ;
-array_call : object ('[' (object | primitive) ']')*;
-object_call : array_call ('.' group)?;
+//group
+//    : object_call
+//    | primitive
+//    ;
+//primitive
+//    : NULL
+//    | UNDEFINED
+//    | BOOL
+//    | NUM
+//    | DOUBLE
+//    | STRING_LITERAL
+//    ;
+//object
+//    : IDENT
+//    | array_literal
+//    | object_literal
+//    | fun_call
+//    | '(' expr ')'
+//    ;
 
 // TYPES
 STRING_LITERAL: '"' STRING* '"';
