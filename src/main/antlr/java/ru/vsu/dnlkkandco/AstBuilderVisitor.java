@@ -159,4 +159,15 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         BlockNode body = new BlockNode(stmts);
         return new FunctionDefinitionNode(funIdent, args, body);
     }
+
+    /* TODO: осталось реализовать
+        array_literal
+        object_literal
+        field
+        assign
+        if
+        while
+        for
+        return
+     */
 }
