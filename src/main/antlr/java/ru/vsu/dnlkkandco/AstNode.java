@@ -104,3 +104,10 @@ class FunctionDefinitionNode extends AstNode {
         children.add(body);
     }
 }
+
+class ReturnNode extends AstNode {
+    public ReturnNode(AstNode value) {
+        super("return");
+        children.add(value);
+    }
+}

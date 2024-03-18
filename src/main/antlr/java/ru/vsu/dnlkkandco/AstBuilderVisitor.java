@@ -151,6 +151,11 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         return new FunctionDefinitionNode(funIdent, args, body);
     }
 
+    @Override
+    public AstNode visitReturn(DnlkkRulesParser.ReturnContext ctx) {
+        return new ReturnNode(visitExpr(ctx.expr()));
+    }
+
     /* TODO: осталось реализовать
         array_literal
         object_literal
@@ -159,6 +164,5 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         if
         while
         for
-        return
      */
 }
