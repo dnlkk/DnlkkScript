@@ -101,13 +101,20 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     public AstNode visitCall(DnlkkRulesParser.CallContext ctx) {
         if (ctx.group() != null)
             return visitGroup(ctx.group());
+        if (ctx.fun_object != null) {
+            List<AstNode> args = new ArrayList<>();
+            for (var arg : ctx.expr())
+                args.add(visitExpr(arg));
+            return new FunctionCallNode(visitCall(ctx.fun_object), args);
+        }
         if (ctx.object != null) {
             AstNode object = visitCall(ctx.object);
             AstNode field = new TerminalAstNode(ctx.IDENT().getText());
             return new ObjectCallNode(object, field);
         }
         AstNode array = visitCall(ctx.array);
-        AstNode expr = visitExpr(ctx.expr());
+
+        AstNode expr = visitExpr(ctx.index);
         return new ArrayCallNode(array, expr);
     }
 
@@ -126,23 +133,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
 
         if (ctx.expr() != null)
             return visitExpr(ctx.expr());
-        if (ctx.fun_call() != null)
-            return visitFun_call(ctx.fun_call());
         throw new RuntimeException("Not implemented yet");
-    }
-
-    @Override
-    public AstNode visitFun_call(DnlkkRulesParser.Fun_callContext ctx) {
-        if (ctx.IDENT() != null)
-            return new TerminalAstNode(ctx.IDENT().getText());
-        if (ctx.fun() != null)
-            return visitFun(ctx.fun());
-
-        AstNode func = visitFun_call(ctx.fun_call());
-        List<AstNode> args = new ArrayList<>();
-        for (var arg : ctx.expr())
-            args.add(visitExpr(arg));
-        return new FunctionCallNode(func, args);
     }
 
     @Override

@@ -1,1 +1,2 @@
-a * (b + c ) / a
+var var1 = a * (b + c ) / a
+var var2 = array[0].foo(a, b)(c)[1]
