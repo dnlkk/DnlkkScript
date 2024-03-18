@@ -1,2 +1,7 @@
 var var1 = a * (b + c ) / a
 var var2 = array[0].foo(a, b)(c)[1]
+
+fun foobar(a1, a2) {
+    var a3 = 0
+    var a4 = --5 * 6
+}

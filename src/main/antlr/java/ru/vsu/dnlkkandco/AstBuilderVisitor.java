@@ -26,7 +26,6 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         if (ctx.if_() != null) return visitIf(ctx.if_());
         if (ctx.while_() != null) return visitWhile(ctx.while_());
         if (ctx.for_() != null) return visitFor(ctx.for_());
-        if (ctx.fun() != null) return visitFun(ctx.fun());
         if (ctx.return_() != null) return visitReturn(ctx.return_());
         if (ctx.GOTO() != null) return new TerminalAstNode(ctx.GOTO().getText());
         throw new RuntimeException("Stmt doesn't contain any node!");
@@ -133,6 +132,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
 
         if (ctx.expr() != null)
             return visitExpr(ctx.expr());
+        if (ctx.fun() != null) return visitFun(ctx.fun());
         throw new RuntimeException("Not implemented yet");
     }
 

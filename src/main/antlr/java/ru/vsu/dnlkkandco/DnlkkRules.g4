@@ -10,7 +10,6 @@ stmt
     | if
     | while
     | for
-    | fun
     | return
     | GOTO
     ;
