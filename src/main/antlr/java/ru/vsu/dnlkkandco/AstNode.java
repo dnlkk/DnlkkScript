@@ -90,7 +90,7 @@ class ArrayCallNode extends AstNode {
 
 class FunctionCallNode extends AstNode {
     public FunctionCallNode(AstNode func, List<AstNode> args) {
-        super("call");
+        super("fun_call");
         children.add(func);
         children.addAll(args);
     }
