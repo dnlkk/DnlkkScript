@@ -111,3 +111,49 @@ class ReturnNode extends AstNode {
         children.add(value);
     }
 }
+
+class AssignNode extends AstNode{
+    public AssignNode(AstNode variable, AstNode value) {
+        super("assign");
+        children.add(variable);
+        children.add(value);
+    }
+}
+
+class WhileNode extends AstNode{
+    public WhileNode(AstNode expr, BlockNode body) {
+        super("while");
+        children.add(expr);
+        children.add(body);
+    }
+}
+
+class ElseNode extends AstNode{
+    public ElseNode(AstNode body) {
+        super("else");
+        children.add(body);
+    }
+}
+
+class ElifNode extends AstNode{
+    public ElifNode(AstNode expr, BlockNode body) {
+        super("elif");
+        children.add(expr);
+        children.add(body);
+    }
+}
+
+
+class IfNode extends AstNode{
+    public IfNode(AstNode expr, BlockNode body, List<AstNode> elif, AstNode elsee) {
+        super("if");
+        children.add(expr);
+        children.add(body);
+        children.addAll(elif);
+        children.add(elsee);
+    }
+}
+
+
+
+

@@ -155,14 +155,63 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     public AstNode visitReturn(DnlkkRulesParser.ReturnContext ctx) {
         return new ReturnNode(visitExpr(ctx.expr()));
     }
+    @Override
+    public AstNode visitAssign(DnlkkRulesParser.AssignContext ctx) {
+        AstNode variable = new TerminalAstNode(ctx.getText());
+        AstNode value = ctx.expr() != null ? visitExpr(ctx.expr()) : visitFun(ctx.fun());
+        return new AssignNode(variable, value);
+    }
 
-    /* TODO: осталось реализовать
-        array_literal
-        object_literal
-        field
-        assign
-        if
-        while
-        for
-     */
+    @Override
+    public AstNode visitWhile(DnlkkRulesParser.WhileContext ctx) {
+        List<AstNode> stmts = new ArrayList<>();
+        if (ctx.stmt_block().stmt_list() != null)
+            for (var stmt : ctx.stmt_block().stmt_list().stmt())
+                stmts.add(visitStmt(stmt));
+        BlockNode body = new BlockNode(stmts);
+        return new WhileNode(visitExpr(ctx.expr()), body);
+    }
+
+    @Override
+    public AstNode visitElse(DnlkkRulesParser.ElseContext ctx) {
+        List<AstNode> stmts = new ArrayList<>();
+        if (ctx.stmt_block().stmt_list() != null)
+            for (var stmt : ctx.stmt_block().stmt_list().stmt())
+                stmts.add(visitStmt(stmt));
+        BlockNode body = new BlockNode(stmts);
+        return new ElseNode(body);
+    }
+
+    @Override
+    public AstNode visitElif(DnlkkRulesParser.ElifContext ctx) {
+        List<AstNode> stmts = new ArrayList<>();
+        if (ctx.stmt_block().stmt_list() != null)
+            for (var stmt : ctx.stmt_block().stmt_list().stmt())
+                stmts.add(visitStmt(stmt));
+        BlockNode body = new BlockNode(stmts);
+        return new ElifNode(visitExpr(ctx.expr()), body);
+    }
+
+    @Override
+    public AstNode visitIf(DnlkkRulesParser.IfContext ctx) {
+        List<AstNode> stmts = new ArrayList<>();
+        if (ctx.stmt_block().stmt_list() != null)
+            for (var stmt : ctx.stmt_block().stmt_list().stmt())
+                stmts.add(visitStmt(stmt));
+        BlockNode body = new BlockNode(stmts);
+
+        List<AstNode> elifs = new ArrayList<>();
+        for (var elif: ctx.elif()) {
+            elifs.add(visitElif(elif));
+        }
+
+        return new IfNode(visitExpr(ctx.expr()), body,
+                elifs, visitElse(ctx.else_()));
+    }
+
+/* TODO: осталось реализовать
+    array_literal : Паша сказал тут ошибка в грамматике
+    for
+*/
+
 }
