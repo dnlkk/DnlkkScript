@@ -26,7 +26,6 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         if (ctx.if_() != null) return visitIf(ctx.if_());
         if (ctx.while_() != null) return visitWhile(ctx.while_());
         if (ctx.for_() != null) return visitFor(ctx.for_());
-        if (ctx.fun() != null) return visitFun(ctx.fun());
         if (ctx.return_() != null) return visitReturn(ctx.return_());
         if (ctx.GOTO() != null) return new TerminalAstNode(ctx.GOTO().getText());
         throw new RuntimeException("Stmt doesn't contain any node!");
@@ -101,13 +100,20 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     public AstNode visitCall(DnlkkRulesParser.CallContext ctx) {
         if (ctx.group() != null)
             return visitGroup(ctx.group());
+        if (ctx.fun_object != null) {
+            List<AstNode> args = new ArrayList<>();
+            for (var arg : ctx.expr())
+                args.add(visitExpr(arg));
+            return new FunctionCallNode(visitCall(ctx.fun_object), args);
+        }
         if (ctx.object != null) {
             AstNode object = visitCall(ctx.object);
             AstNode field = new TerminalAstNode(ctx.IDENT().getText());
             return new ObjectCallNode(object, field);
         }
         AstNode array = visitCall(ctx.array);
-        AstNode expr = visitExpr(ctx.expr());
+
+        AstNode expr = visitExpr(ctx.index);
         return new ArrayCallNode(array, expr);
     }
 
@@ -126,25 +132,11 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
 
         if (ctx.expr() != null)
             return visitExpr(ctx.expr());
-        if (ctx.fun_call() != null)
-            return visitFun_call(ctx.fun_call());
         if (ctx.object_literal() != null)
             return visitObject_literal(ctx.object_literal());
-        throw new RuntimeException("Not implemented yet");
-    }
-
-    @Override
-    public AstNode visitFun_call(DnlkkRulesParser.Fun_callContext ctx) {
-        if (ctx.IDENT() != null)
-            return new TerminalAstNode(ctx.IDENT().getText());
         if (ctx.fun() != null)
             return visitFun(ctx.fun());
-
-        AstNode func = visitFun_call(ctx.fun_call());
-        List<AstNode> args = new ArrayList<>();
-        for (var arg : ctx.expr())
-            args.add(visitExpr(arg));
-        return new FunctionCallNode(func, args);
+        throw new RuntimeException("Not implemented yet");
     }
 
     @Override
@@ -162,7 +154,6 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         return new FunctionDefinitionNode(funIdent, args, body);
     }
 
-    @Override
     public AstNode visitField(DnlkkRulesParser.FieldContext ctx) {
         AstNode fieldName = new TerminalAstNode(ctx.IDENT().getText());
         AstNode value = ctx.expr() != null ? visitExpr(ctx.expr()) : visitFun(ctx.fun());
@@ -177,6 +168,9 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         }
         return new ObjectLiteralNode(fields);
     }
+    public AstNode visitReturn(DnlkkRulesParser.ReturnContext ctx) {
+        return new ReturnNode(visitExpr(ctx.expr()));
+    }
 
     /* TODO: осталось реализовать
         array_literal
@@ -184,6 +178,5 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         if
         while
         for
-        return
      */
 }

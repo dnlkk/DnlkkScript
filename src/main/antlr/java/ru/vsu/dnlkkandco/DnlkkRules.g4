@@ -10,7 +10,6 @@ stmt
     | if
     | while
     | for
-    | fun
     | return
     | GOTO
     ;
@@ -26,11 +25,11 @@ return : RETURN expr ;
 
 fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
 
-fun_call
-    : IDENT
-    | fun
-    | fun_call '(' (expr (',' expr)*)? ')'
-    ;
+//fun_call
+//    : IDENT
+//    | fun
+//    | fun_call '(' (expr (',' expr)*)? ')'
+//    ;
 
 definition : 'var' assign ;
 assign : IDENT '=' (expr | fun) ;
@@ -61,8 +60,9 @@ unary
     ;
 call
     : group
+    | fun_object=call '(' (expr (',' expr)*)? ')'
     | object=call '.' IDENT
-    | array=call '[' expr ']'
+    | array=call '[' index=expr ']'
     ;
 group
     : NULL
@@ -72,7 +72,7 @@ group
     | DOUBLE
     | STRING_LITERAL
     | IDENT
-    | fun_call
+    | fun
     | array_literal
     | object_literal
     | '(' expr ')'
