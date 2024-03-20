@@ -80,7 +80,11 @@ group
 
 // TYPES
 STRING_LITERAL: '"' STRING* '"';
-array_literal: '[' ((expr | fun) ','?)* ']';
+array_literal:
+    | '[' ']'
+    | '[' array_element (',' array_element)* ']'
+    ;
+array_element : expr | fun;
 object_literal: '{' (field ','?)* '}';
 field: IDENT ':' (expr | fun);
 //
