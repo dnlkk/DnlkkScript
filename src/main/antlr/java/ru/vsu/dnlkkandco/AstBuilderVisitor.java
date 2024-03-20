@@ -132,7 +132,10 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
 
         if (ctx.expr() != null)
             return visitExpr(ctx.expr());
-        if (ctx.fun() != null) return visitFun(ctx.fun());
+        if (ctx.object_literal() != null)
+            return visitObject_literal(ctx.object_literal());
+        if (ctx.fun() != null)
+            return visitFun(ctx.fun());
         throw new RuntimeException("Not implemented yet");
     }
 
@@ -151,15 +154,26 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         return new FunctionDefinitionNode(funIdent, args, body);
     }
 
+    public AstNode visitField(DnlkkRulesParser.FieldContext ctx) {
+        AstNode fieldName = new TerminalAstNode(ctx.IDENT().getText());
+        AstNode value = ctx.expr() != null ? visitExpr(ctx.expr()) : visitFun(ctx.fun());
+        return new FieldNode(fieldName, value);
+    }
+
     @Override
+    public AstNode visitObject_literal(DnlkkRulesParser.Object_literalContext ctx) {
+        List<AstNode> fields = new ArrayList<>();
+        for (var field: ctx.field()) {
+            fields.add(visitField(field));
+        }
+        return new ObjectLiteralNode(fields);
+    }
     public AstNode visitReturn(DnlkkRulesParser.ReturnContext ctx) {
         return new ReturnNode(visitExpr(ctx.expr()));
     }
 
     /* TODO: осталось реализовать
         array_literal
-        object_literal
-        field
         assign
         if
         while
