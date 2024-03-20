@@ -1,3 +1,5 @@
+a = {b : 3, foo : fun(a, b){} }
+
 var var1 = a * (b + c ) / a
 var var2 = array[0].foo(a, b)(c)[1]
 
