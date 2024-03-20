@@ -23,6 +23,7 @@ for : FOR '(' definition? ';' logical? ';' add? ')' stmt_block? ;
 
 return : RETURN expr ;
 
+//todo исправить тут ошибку
 fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
 
 //fun_call
@@ -81,8 +82,8 @@ group
 // TYPES
 STRING_LITERAL: '"' STRING* '"';
 array_literal:
-    | '[' ']'
-    | '[' array_element (',' array_element)* ']'
+    | '['  ']'
+    | '[' EOL* array_element ( EOL* ',' EOL* array_element)* EOL* ']'
     ;
 array_element : expr | fun;
 object_literal: '{' (field ','?)* '}';
