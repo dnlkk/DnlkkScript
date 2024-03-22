@@ -32,7 +32,7 @@ fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
 //    | fun_call '(' (expr (',' expr)*)? ')'
 //    ;
 
-definition : 'var' assign ;
+definition : VAR assign ;
 assign : IDENT '=' (expr | fun) ;
 
 // BASE
@@ -80,12 +80,12 @@ group
     ;
 
 // TYPES
-STRING_LITERAL: '"' STRING* '"';
 array_literal:
     | '['  ']'
     | '[' EOL* array_element ( EOL* ',' EOL* array_element)* EOL* ']'
     ;
 array_element : expr | fun;
+STRING_LITERAL: '"' [a-zA-Z0-9 ,'!@#$%^&*()_+№;?=]* '"';
 object_literal: '{' (field ','?)* '}';
 field: IDENT ':' (expr | fun);
 //
@@ -100,12 +100,12 @@ FUN : 'fun' ;
 GOTO : 'continue' | 'break' ;
 LOGICAL_OPERATORS : 'or' | 'and' ;
 NOT_LOGICAL_OPERATOR : 'not';
+VAR : 'var' ;
 
 IDENT: (CHAR | '_')(CHAR | NUM | '_')* ;
 
 // TYPES
 CHAR : ([a-z] | [A-Z]) ;
-STRING : (CHAR)+;
 NUM : [0-9]+ ;
 DOUBLE : [0-9]*[.][0-9]* ;
 BOOL : 'false' | 'true' ;
@@ -121,5 +121,5 @@ ADD : '+' | '-' ;
 MULT : '*' | '/' | '//' | '/%' ;
 
 EOL : [\n] ;
-WS : [ \t\r] -> skip ;
-COMMENT : (START_COMMENT ' '* STRING* END_COMMENT?) -> skip  ;
+WS : [ \t\r] -> channel(HIDDEN) ;
+COMMENT : (START_COMMENT ' '* [a-zA-Z0-9 ]* END_COMMENT?) -> skip  ;
