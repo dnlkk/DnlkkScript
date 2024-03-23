@@ -1,1 +1,1 @@
-fun (a, b) {}
+for (var a = 1; a < 2; a = a + 2) {}

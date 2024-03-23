@@ -27,8 +27,6 @@ public class DnlkkScript {
         AstNode node = tree.accept(new AstBuilderVisitor());
         String result = treeViewAst(node);
         System.out.println(result);
-//        Node treeNode = parseTree(tree.toStringTree(parser));
-//        printTree(treeNode, 0, true);
     }
 
     static String treeView(ParseTree tree) {
