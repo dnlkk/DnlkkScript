@@ -145,7 +145,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     public AstNode visitFun(DnlkkRulesParser.FunContext ctx) {
         TerminalAstNode funIdent = ctx.fun_ident == null ? null : new TerminalAstNode(ctx.fun_ident.getText());
         List<AstNode> args = new ArrayList<>();
-        for (int i = 1; i < ctx.IDENT().size(); i++)
+        for (int i = ctx.fun_ident == null ? 0 : 1; i < ctx.IDENT().size(); i++)
             args.add(new TerminalAstNode(ctx.IDENT(i).getText()));
 
         List<AstNode> stmts = new ArrayList<>();
@@ -243,7 +243,6 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     }
 
 /* TODO: осталось реализовать
-    array_literal : Паша сказал тут ошибка в грамматике
     for
 */
 }

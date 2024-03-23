@@ -1,8 +1,8 @@
 grammar DnlkkRules;
 
-program : stmt_list? EOF;
-stmt_list : stmt (EOL+ stmt)* EOL*;
-stmt_block : EOL* '{' EOL* stmt_list? EOL* '}' EOL*;
+program : stmt_list EOF;
+stmt_list: stmt (stmt)*;
+stmt_block : '{' stmt_list '}';
 stmt
     : definition
     | assign
@@ -80,13 +80,10 @@ group
     ;
 
 // TYPES
-array_literal:
-    | '['  ']'
-    | '[' EOL* array_element ( EOL* ',' EOL* array_element)* EOL* ']'
-    ;
+array_literal : '[' (array_element (',' array_element)*)? ']';
 array_element : expr | fun;
 STRING_LITERAL: '"' [a-zA-Z0-9 ,'!@#$%^&*()_+№;?=]* '"';
-object_literal: '{' (field ','?)* '}';
+object_literal: '{' (field (',' field)*)? '}';
 field: IDENT ':' (expr | fun);
 //
 
@@ -120,6 +117,6 @@ COMPARE : '>' | '<' | '>=' | '<=' | '==' | '!=' ;
 ADD : '+' | '-' ;
 MULT : '*' | '/' | '//' | '/%' ;
 
-EOL : [\n] ;
-WS : [ \t\r] -> channel(HIDDEN) ;
+//EOL : [\n] ;
+WS : [ \t\r\n] -> channel(HIDDEN) ;
 COMMENT : (START_COMMENT ' '* [a-zA-Z0-9 ]* END_COMMENT?) -> skip  ;
