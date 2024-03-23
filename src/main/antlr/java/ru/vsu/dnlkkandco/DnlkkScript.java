@@ -61,10 +61,10 @@ public class DnlkkScript {
     }
 
     static StringBuffer treeViewAstInner(AstNode tree, StringBuffer out, String prevPrefix, String prefixLine, String prefixNode) {
-        String line = prevPrefix + prefixNode + tree.getName();
+        String line = prevPrefix + prefixNode + (tree == null ? "null" : tree.getName());
 
         out.append(line).append('\n');
-        for (int i = 0; i < tree.getChildrenAmount(); i++) {
+        for (int i = 0; tree != null && i < tree.getChildrenAmount(); i++) {
             boolean last = i == tree.getChildrenAmount() - 1;
             String nextLevelPrefix = last ? "  " : "│ ";
             String nodePrefix = last ? "└─" : "├─";

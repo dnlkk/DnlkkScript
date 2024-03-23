@@ -2,7 +2,7 @@ grammar DnlkkRules;
 
 program : stmt_list EOF;
 stmt_list: stmt (stmt)*;
-stmt_block : '{' stmt_list '}';
+stmt_block : '{' stmt_list? '}';
 stmt
     : definition
     | assign
@@ -18,8 +18,8 @@ stmt
 if : IF '(' expr ')' stmt_block elif* else? ;
 elif : ELIF '(' expr ')' stmt_block ;
 else : ELSE stmt_block ;
-while : WHILE '(' expr ')' stmt_block? ;
-for : FOR '(' definition? ';' logical? ';' assign? ')' stmt_block? ;
+while : WHILE '(' expr ')' stmt_block ;
+for : FOR '(' definition? ';' logical? ';' assign? ')' stmt_block ;
 
 return : RETURN expr ;
 

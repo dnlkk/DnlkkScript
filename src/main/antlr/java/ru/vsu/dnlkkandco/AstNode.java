@@ -99,7 +99,7 @@ class FunctionCallNode extends AstNode {
 class FunctionDefinitionNode extends AstNode {
     public FunctionDefinitionNode(TerminalAstNode funIdent, List<AstNode> args, BlockNode body) {
         super("def " + (funIdent == null ? "<Anonymous>" : funIdent.getName()));
-        children.add(funIdent == null ? new TerminalAstNode("<Anonymous>") : funIdent);
+        children.add(funIdent);
         children.addAll(args);
         children.add(body);
     }
