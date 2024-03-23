@@ -85,7 +85,6 @@ array_element : expr | fun;
 STRING_LITERAL: '"' [a-zA-Z0-9 ,'!@#$%^&*()_+№;?=]* '"';
 object_literal: '{' (field (',' field)*)? '}';
 field: IDENT ':' (expr | fun);
-//
 
 IF: 'if' ;
 ELIF : 'elif' ;
@@ -117,6 +116,5 @@ COMPARE : '>' | '<' | '>=' | '<=' | '==' | '!=' ;
 ADD : '+' | '-' ;
 MULT : '*' | '/' | '//' | '/%' ;
 
-//EOL : [\n] ;
 WS : [ \t\r\n] -> channel(HIDDEN) ;
 COMMENT : (START_COMMENT ' '* [a-zA-Z0-9 ]* END_COMMENT?) -> skip  ;
