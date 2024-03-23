@@ -242,7 +242,17 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
                 elifs, visitElse(ctx.else_()));
     }
 
-/* TODO: осталось реализовать
-    for
-*/
+    @Override
+    public AstNode visitFor(DnlkkRulesParser.ForContext ctx) {
+        AstNode definition = ctx.definition() == null ? null : visitDefinition(ctx.definition());
+        AstNode condition = ctx.logical() == null ? null : visitLogical(ctx.logical());
+        AstNode assign = ctx.assign() == null ? null : visitAssign(ctx.assign());
+        List<AstNode> stmts = new ArrayList<>();
+        if (ctx.stmt_block().stmt_list() != null)
+            for (var stmt : ctx.stmt_block().stmt_list().stmt())
+                stmts.add(visitStmt(stmt));
+        BlockNode body = new BlockNode(stmts);
+
+        return new ForNode(definition, condition, assign, body);
+    }
 }

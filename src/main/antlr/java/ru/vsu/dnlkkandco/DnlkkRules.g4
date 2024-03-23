@@ -19,11 +19,10 @@ if : IF '(' expr ')' stmt_block elif* else? ;
 elif : ELIF '(' expr ')' stmt_block ;
 else : ELSE stmt_block ;
 while : WHILE '(' expr ')' stmt_block? ;
-for : FOR '(' definition? ';' logical? ';' add? ')' stmt_block? ;
+for : FOR '(' definition? ';' logical? ';' assign? ')' stmt_block? ;
 
 return : RETURN expr ;
 
-//todo исправить тут ошибку
 fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
 
 //fun_call

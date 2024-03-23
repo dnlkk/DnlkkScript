@@ -176,6 +176,12 @@ class IfNode extends AstNode{
     }
 }
 
-
-
-
+class ForNode extends AstNode {
+    public ForNode(AstNode definition, AstNode logical, AstNode assign, AstNode body) {
+        super("for");
+        children.add(definition);
+        children.add(logical);
+        children.add(assign);
+        children.add(body);
+    }
+}
