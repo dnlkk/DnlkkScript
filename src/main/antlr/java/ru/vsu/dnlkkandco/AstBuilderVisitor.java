@@ -134,6 +134,8 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
             return visitExpr(ctx.expr());
         if (ctx.object_literal() != null)
             return visitObject_literal(ctx.object_literal());
+        if (ctx.array_literal() != null)
+            return visitArray_literal(ctx.array_literal());
         if (ctx.fun() != null)
             return visitFun(ctx.fun());
         throw new RuntimeException("Not implemented yet");
@@ -143,7 +145,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     public AstNode visitFun(DnlkkRulesParser.FunContext ctx) {
         TerminalAstNode funIdent = ctx.fun_ident == null ? null : new TerminalAstNode(ctx.fun_ident.getText());
         List<AstNode> args = new ArrayList<>();
-        for (int i = 1; i < ctx.IDENT().size(); i++)
+        for (int i = ctx.fun_ident == null ? 0 : 1; i < ctx.IDENT().size(); i++)
             args.add(new TerminalAstNode(ctx.IDENT(i).getText()));
 
         List<AstNode> stmts = new ArrayList<>();
@@ -168,12 +170,27 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         }
         return new ObjectLiteralNode(fields);
     }
+
+    @Override
+    public AstNode visitArray_literal(DnlkkRulesParser.Array_literalContext ctx) {
+        List<AstNode> elements = new ArrayList<>();
+        for (var element : ctx.array_element())
+            elements.add(visitArray_element(element));
+
+        return new ArrayLiteralNode(elements);
+    }
+
+    @Override
+    public AstNode visitArray_element(DnlkkRulesParser.Array_elementContext ctx) {
+        return ctx.expr() != null ? visitExpr(ctx.expr()) : visitFun(ctx.fun());
+    }
+
     public AstNode visitReturn(DnlkkRulesParser.ReturnContext ctx) {
         return new ReturnNode(visitExpr(ctx.expr()));
     }
     @Override
     public AstNode visitAssign(DnlkkRulesParser.AssignContext ctx) {
-        AstNode variable = new TerminalAstNode(ctx.getText());
+        AstNode variable = new TerminalAstNode(ctx.IDENT().getText());
         AstNode value = ctx.expr() != null ? visitExpr(ctx.expr()) : visitFun(ctx.fun());
         return new AssignNode(variable, value);
     }
@@ -226,7 +243,6 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     }
 
 /* TODO: осталось реализовать
-    array_literal : Паша сказал тут ошибка в грамматике
     for
 */
 }

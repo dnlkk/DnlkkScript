@@ -1,8 +1,8 @@
 grammar DnlkkRules;
 
-program : stmt_list? EOF;
-stmt_list : stmt (EOL+ stmt)* EOL*;
-stmt_block : EOL* '{' EOL* stmt_list? EOL* '}' EOL*;
+program : stmt_list EOF;
+stmt_list: stmt (stmt)*;
+stmt_block : '{' stmt_list '}';
 stmt
     : definition
     | assign
@@ -23,6 +23,7 @@ for : FOR '(' definition? ';' logical? ';' add? ')' stmt_block? ;
 
 return : RETURN expr ;
 
+//todo исправить тут ошибку
 fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
 
 //fun_call
@@ -79,11 +80,11 @@ group
     ;
 
 // TYPES
+array_literal : '[' (array_element (',' array_element)*)? ']';
+array_element : expr | fun;
 STRING_LITERAL: '"' [a-zA-Z0-9 ,'!@#$%^&*()_+№;?=]* '"';
-array_literal: '[' ((expr | fun) ','?)* ']';
-object_literal: '{' (field ','?)* '}';
+object_literal: '{' (field (',' field)*)? '}';
 field: IDENT ':' (expr | fun);
-//
 
 IF: 'if' ;
 ELIF : 'elif' ;
@@ -115,6 +116,5 @@ COMPARE : '>' | '<' | '>=' | '<=' | '==' | '!=' ;
 ADD : '+' | '-' ;
 MULT : '*' | '/' | '//' | '/%' ;
 
-EOL : [\n] ;
-WS : [ \t\r] -> channel(HIDDEN) ;
+WS : [ \t\r\n] -> channel(HIDDEN) ;
 COMMENT : (START_COMMENT ' '* [a-zA-Z0-9 ]* END_COMMENT?) -> skip  ;

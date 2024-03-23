@@ -112,6 +112,13 @@ class ObjectLiteralNode extends AstNode {
     }
 }
 
+class ArrayLiteralNode extends AstNode {
+    public ArrayLiteralNode(List<AstNode> elements) {
+        super("array_def");
+        children.addAll(elements);
+    }
+}
+
 class FieldNode extends AstNode {
     public FieldNode(AstNode fieldName, AstNode value) {
         super("field");
