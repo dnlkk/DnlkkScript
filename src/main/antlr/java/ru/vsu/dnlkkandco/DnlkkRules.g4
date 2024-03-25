@@ -4,14 +4,14 @@ program : stmt_list EOF;
 stmt_list: stmt (stmt)*;
 stmt_block : '{' stmt_list? '}';
 stmt
-    : definition
-    | assign
-    | expr
-    | if
-    | while
-    | for
-    | return
-    | GOTO
+    : definition #definition_stmt
+    | assign #assign_stmt
+    | expr #expr_stmt
+    | if #if_stmt
+    | while #while_stmt
+    | for #for_stmt
+    | return #return_stmt
+    | GOTO #goto_stmt
     ;
 
 // OPERATORS

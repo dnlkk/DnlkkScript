@@ -13,22 +13,49 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         System.out.println("Stmts amount: " + ctx.stmt_list().stmt().size());
         List<AstNode> stmts = new ArrayList<>();
         for (DnlkkRulesParser.StmtContext stmtCtx : ctx.stmt_list().stmt()) {
-            stmts.add(visitStmt(stmtCtx));
+            stmts.add(visit(stmtCtx));
         }
         return new ProgramNode(stmts);
     }
 
     @Override
-    public AstNode visitStmt(DnlkkRulesParser.StmtContext ctx) {
-        if (ctx.definition() != null) return visitDefinition(ctx.definition());
-        if (ctx.assign() != null) return visitAssign(ctx.assign());
-        if (ctx.expr() != null) return visitExpr(ctx.expr());
-        if (ctx.if_() != null) return visitIf(ctx.if_());
-        if (ctx.while_() != null) return visitWhile(ctx.while_());
-        if (ctx.for_() != null) return visitFor(ctx.for_());
-        if (ctx.return_() != null) return visitReturn(ctx.return_());
-        if (ctx.GOTO() != null) return new TerminalAstNode(ctx.GOTO().getText());
-        throw new RuntimeException("Stmt doesn't contain any node!");
+    public AstNode visitDefinition_stmt(DnlkkRulesParser.Definition_stmtContext ctx) {
+        return visitDefinition(ctx.definition());
+    }
+
+    @Override
+    public AstNode visitAssign_stmt(DnlkkRulesParser.Assign_stmtContext ctx) {
+        return visitAssign(ctx.assign());
+    }
+
+    @Override
+    public AstNode visitExpr_stmt(DnlkkRulesParser.Expr_stmtContext ctx) {
+        return visitExpr(ctx.expr());
+    }
+
+    @Override
+    public AstNode visitIf_stmt(DnlkkRulesParser.If_stmtContext ctx) {
+        return visitIf(ctx.if_());
+    }
+
+    @Override
+    public AstNode visitWhile_stmt(DnlkkRulesParser.While_stmtContext ctx) {
+        return visitWhile(ctx.while_());
+    }
+
+    @Override
+    public AstNode visitFor_stmt(DnlkkRulesParser.For_stmtContext ctx) {
+        return visitFor(ctx.for_());
+    }
+
+    @Override
+    public AstNode visitReturn_stmt(DnlkkRulesParser.Return_stmtContext ctx) {
+        return visitReturn(ctx.return_());
+    }
+
+    @Override
+    public AstNode visitGoto_stmt(DnlkkRulesParser.Goto_stmtContext ctx) {
+        return new TerminalAstNode(ctx.GOTO().getText());
     }
 
     @Override
@@ -151,7 +178,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         List<AstNode> stmts = new ArrayList<>();
         if (ctx.stmt_block().stmt_list() != null)
             for (var stmt : ctx.stmt_block().stmt_list().stmt())
-                stmts.add(visitStmt(stmt));
+                stmts.add(visit(stmt));
         BlockNode body = new BlockNode(stmts);
         return new FunctionDefinitionNode(funIdent, args, body);
     }
@@ -200,7 +227,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         List<AstNode> stmts = new ArrayList<>();
         if (ctx.stmt_block().stmt_list() != null)
             for (var stmt : ctx.stmt_block().stmt_list().stmt())
-                stmts.add(visitStmt(stmt));
+                stmts.add(visit(stmt));
         BlockNode body = new BlockNode(stmts);
         return new WhileNode(visitExpr(ctx.expr()), body);
     }
@@ -210,7 +237,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         List<AstNode> stmts = new ArrayList<>();
         if (ctx.stmt_block().stmt_list() != null)
             for (var stmt : ctx.stmt_block().stmt_list().stmt())
-                stmts.add(visitStmt(stmt));
+                stmts.add(visit(stmt));
         BlockNode body = new BlockNode(stmts);
         return new ElseNode(body);
     }
@@ -220,7 +247,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         List<AstNode> stmts = new ArrayList<>();
         if (ctx.stmt_block().stmt_list() != null)
             for (var stmt : ctx.stmt_block().stmt_list().stmt())
-                stmts.add(visitStmt(stmt));
+                stmts.add(visit(stmt));
         BlockNode body = new BlockNode(stmts);
         return new ElifNode(visitExpr(ctx.expr()), body);
     }
@@ -230,7 +257,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         List<AstNode> stmts = new ArrayList<>();
         if (ctx.stmt_block().stmt_list() != null)
             for (var stmt : ctx.stmt_block().stmt_list().stmt())
-                stmts.add(visitStmt(stmt));
+                stmts.add(visit(stmt));
         BlockNode body = new BlockNode(stmts);
 
         List<AstNode> elifs = new ArrayList<>();
@@ -250,7 +277,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         List<AstNode> stmts = new ArrayList<>();
         if (ctx.stmt_block().stmt_list() != null)
             for (var stmt : ctx.stmt_block().stmt_list().stmt())
-                stmts.add(visitStmt(stmt));
+                stmts.add(visit(stmt));
         BlockNode body = new BlockNode(stmts);
 
         return new ForNode(definition, condition, assign, body);
