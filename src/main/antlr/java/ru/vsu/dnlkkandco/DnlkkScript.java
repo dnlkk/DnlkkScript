@@ -24,9 +24,14 @@ public class DnlkkScript {
         DnlkkRulesParser parser = new DnlkkRulesParser(tokens);
 
         ParseTree tree = parser.program();
-        AstNode node = tree.accept(new AstBuilderVisitor());
-        String result = treeViewAst(node);
-        System.out.println(result);
+        try {
+            AstNode node = tree.accept(new AstBuilderVisitor());
+            String result = treeViewAst(node);
+            System.out.println(result);
+        } catch (Exception e) {
+            System.err.println("Parsing error");
+            System.err.println(e.getMessage());
+        }
     }
 
     static String treeView(ParseTree tree) {
