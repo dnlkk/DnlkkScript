@@ -23,14 +23,6 @@ for : FOR '(' definition? ';' logical? ';' assign? ')' stmt_block ;
 
 return : RETURN expr ;
 
-fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
-
-//fun_call
-//    : IDENT
-//    | fun
-//    | fun_call '(' (expr (',' expr)*)? ')'
-//    ;
-
 definition : VAR assign ;
 assign : IDENT '=' (expr | fun) ;
 
@@ -83,6 +75,7 @@ primitive
     ;
 
 // TYPES
+fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
 array_literal : '[' (array_element (',' array_element)*)? ']';
 array_element : expr | fun;
 STRING_LITERAL: '"' [a-zA-Z0-9 ,'!@#$%^&*()_+№;?=]* '"';
