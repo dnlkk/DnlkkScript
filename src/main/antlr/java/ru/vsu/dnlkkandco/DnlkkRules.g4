@@ -4,14 +4,14 @@ program : stmt_list EOF;
 stmt_list: stmt (stmt)*;
 stmt_block : '{' stmt_list? '}';
 stmt
-    : definition
-    | assign
-    | expr
-    | if
-    | while
-    | for
-    | return
-    | GOTO
+    : definition #definition_stmt
+    | assign #assign_stmt
+    | expr #expr_stmt
+    | if #if_stmt
+    | while #while_stmt
+    | for #for_stmt
+    | return #return_stmt
+    | GOTO #goto_stmt
     ;
 
 // OPERATORS
@@ -22,14 +22,6 @@ while : WHILE '(' expr ')' stmt_block ;
 for : FOR '(' definition? ';' logical? ';' assign? ')' stmt_block ;
 
 return : RETURN expr ;
-
-fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
-
-//fun_call
-//    : IDENT
-//    | fun
-//    | fun_call '(' (expr (',' expr)*)? ')'
-//    ;
 
 definition : VAR assign ;
 assign : IDENT '=' (expr | fun) ;
@@ -59,12 +51,20 @@ unary
     | MULT unary_mult_operand=unary
     ;
 call
-    : group
-    | fun_object=call '(' (expr (',' expr)*)? ')'
-    | object=call '.' IDENT
-    | array=call '[' index=expr ']'
+    : group #group_call
+    | call '(' (expr (',' expr)*)? ')' #fun_call
+    | call '.' IDENT #object_call
+    | call '[' index=expr ']' #array_call
     ;
 group
+    : primitive #primitive_group
+    | fun #fun_group
+    | array_literal #array_literal_group
+    | object_literal #object_literal_group
+    | '(' expr ')' #expr_group
+    ;
+
+primitive
     : NULL
     | UNDEFINED
     | BOOL
@@ -72,13 +72,10 @@ group
     | DOUBLE
     | STRING_LITERAL
     | IDENT
-    | fun
-    | array_literal
-    | object_literal
-    | '(' expr ')'
     ;
 
 // TYPES
+fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
 array_literal : '[' (array_element (',' array_element)*)? ']';
 array_element : expr | fun;
 STRING_LITERAL: '"' [a-zA-Z0-9 ,'!@#$%^&*()_+№;?=]* '"';
