@@ -117,28 +117,35 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     @Override
     public AstNode visitUnary(DnlkkRulesParser.UnaryContext ctx) {
         if (ctx.call() != null)
-            return visitCall(ctx.call());
+            return visit(ctx.call());
         if (ctx.unary_add_operand != null)
             return new UnaryOpNode(ctx.ADD().getText(), visitUnary(ctx.unary_add_operand));
         return new UnaryOpNode(ctx.MULT().getText(), visitUnary(ctx.unary_mult_operand));
     }
 
     @Override
-    public AstNode visitCall(DnlkkRulesParser.CallContext ctx) {
-        if (ctx.group() != null)
-            return visit(ctx.group());
-        if (ctx.fun_object != null) {
-            List<AstNode> args = new ArrayList<>();
-            for (var arg : ctx.expr())
-                args.add(visitExpr(arg));
-            return new FunctionCallNode(visitCall(ctx.fun_object), args);
-        }
-        if (ctx.object != null) {
-            AstNode object = visitCall(ctx.object);
-            AstNode field = new TerminalAstNode(ctx.IDENT().getText());
-            return new ObjectCallNode(object, field);
-        }
-        AstNode array = visitCall(ctx.array);
+    public AstNode visitGroup_call(DnlkkRulesParser.Group_callContext ctx) {
+        return visit(ctx.group());
+    }
+
+    @Override
+    public AstNode visitFun_call(DnlkkRulesParser.Fun_callContext ctx) {
+        List<AstNode> args = new ArrayList<>();
+        for (var arg : ctx.expr())
+            args.add(visitExpr(arg));
+        return new FunctionCallNode(visit(ctx.call()), args);
+    }
+
+    @Override
+    public AstNode visitObject_call(DnlkkRulesParser.Object_callContext ctx) {
+        AstNode object = visit(ctx.call());
+        AstNode field = new TerminalAstNode(ctx.IDENT().getText());
+        return new ObjectCallNode(object, field);
+    }
+
+    @Override
+    public AstNode visitArray_call(DnlkkRulesParser.Array_callContext ctx) {
+        AstNode array = visit(ctx.call());
 
         AstNode expr = visitExpr(ctx.index);
         return new ArrayCallNode(array, expr);

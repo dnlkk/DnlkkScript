@@ -51,10 +51,10 @@ unary
     | MULT unary_mult_operand=unary
     ;
 call
-    : group
-    | fun_object=call '(' (expr (',' expr)*)? ')'
-    | object=call '.' IDENT
-    | array=call '[' index=expr ']'
+    : group #group_call
+    | call '(' (expr (',' expr)*)? ')' #fun_call
+    | call '.' IDENT #object_call
+    | call '[' index=expr ']' #array_call
     ;
 group
     : primitive #primitive_group
