@@ -65,6 +65,14 @@ call
     | array=call '[' index=expr ']'
     ;
 group
+    : primitive #primitive_group
+    | fun #fun_group
+    | array_literal #array_literal_group
+    | object_literal #object_literal_group
+    | '(' expr ')' #expr_group
+    ;
+
+primitive
     : NULL
     | UNDEFINED
     | BOOL
@@ -72,10 +80,6 @@ group
     | DOUBLE
     | STRING_LITERAL
     | IDENT
-    | fun
-    | array_literal
-    | object_literal
-    | '(' expr ')'
     ;
 
 // TYPES

@@ -126,7 +126,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     @Override
     public AstNode visitCall(DnlkkRulesParser.CallContext ctx) {
         if (ctx.group() != null)
-            return visitGroup(ctx.group());
+            return visit(ctx.group());
         if (ctx.fun_object != null) {
             List<AstNode> args = new ArrayList<>();
             for (var arg : ctx.expr())
@@ -145,27 +145,28 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitGroup(DnlkkRulesParser.GroupContext ctx) {
-        TerminalNode[] terms = {
-                ctx.NULL(),
-                ctx.UNDEFINED(),
-                ctx.BOOL(),
-                ctx.NUM(),
-                ctx.DOUBLE(),
-                ctx.STRING_LITERAL(),
-                ctx.IDENT()};
-        for (TerminalNode term : terms)
-            if (term != null) return new TerminalAstNode(term.getText());
+    public AstNode visitPrimitive_group(DnlkkRulesParser.Primitive_groupContext ctx) {
+        return new TerminalAstNode(ctx.getText());
+    }
 
-        if (ctx.expr() != null)
-            return visitExpr(ctx.expr());
-        if (ctx.object_literal() != null)
-            return visitObject_literal(ctx.object_literal());
-        if (ctx.array_literal() != null)
-            return visitArray_literal(ctx.array_literal());
-        if (ctx.fun() != null)
-            return visitFun(ctx.fun());
-        throw new RuntimeException("Not implemented yet");
+    @Override
+    public AstNode visitFun_group(DnlkkRulesParser.Fun_groupContext ctx) {
+        return visitFun(ctx.fun());
+    }
+
+    @Override
+    public AstNode visitArray_literal_group(DnlkkRulesParser.Array_literal_groupContext ctx) {
+        return visitArray_literal(ctx.array_literal());
+    }
+
+    @Override
+    public AstNode visitObject_literal_group(DnlkkRulesParser.Object_literal_groupContext ctx) {
+        return visitObject_literal(ctx.object_literal());
+    }
+
+    @Override
+    public AstNode visitExpr_group(DnlkkRulesParser.Expr_groupContext ctx) {
+        return visitExpr(ctx.expr());
     }
 
     @Override
