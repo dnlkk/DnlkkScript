@@ -7,6 +7,7 @@ import ru.vsu.dnlkkandco.gen.DnlkkRulesParser;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Stack;
 
 import static ru.vsu.dnlkkandco.Parser.parseTree;
 import static ru.vsu.dnlkkandco.Parser.printTree;
@@ -31,6 +32,7 @@ public class DnlkkScript {
         } catch (Exception e) {
             System.err.println("Parsing error");
             System.err.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 

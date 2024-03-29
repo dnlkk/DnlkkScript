@@ -65,7 +65,9 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
                 ctx.assign().expr() != null ?
                         visitExpr(ctx.assign().expr()) :
                         visitFun(ctx.assign().fun());
-        return new BinOpNode("var", ident, value);
+        if (value == null){
+            return new BinOpNode("var", ident, null);
+        }else return new BinOpNode("var", ident, value);
     }
 
     @Override

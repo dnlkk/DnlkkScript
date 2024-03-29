@@ -23,7 +23,7 @@ for : FOR '(' definition? ';' logical? ';' assign? ')' stmt_block ;
 
 return : RETURN expr ;
 
-definition : VAR assign ;
+definition : VAR (assign | IDENT) ;
 assign : IDENT '=' (expr | fun) ;
 
 // BASE
