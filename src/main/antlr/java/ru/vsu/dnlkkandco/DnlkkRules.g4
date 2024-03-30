@@ -1,54 +1,103 @@
 grammar DnlkkRules;
 
 program : stmt_list EOF;
-stmt_list : stmt* ;
-stmt_block : '{'stmt_list '}';
-stmt : definition | assign | expr | compare | if | while | for | fun | return | GOTO | fun_call;
+stmt_list: stmt (stmt)*;
+stmt_block : '{' stmt_list? '}';
+stmt
+    : definition #definition_stmt
+    | assign #assign_stmt
+    | expr #expr_stmt
+    | if #if_stmt
+    | while #while_stmt
+    | for #for_stmt
+    | return #return_stmt
+    | GOTO #goto_stmt
+    ;
 
 // OPERATORS
-if : 'if' '(' logical ')' stmt_block (('elif' '(' expr ')' stmt_block)* ('else' stmt_block)?)? ;
-while : 'while' '(' logical ')' stmt_block? ;
-for : 'for' '(' definition? ';' logical? ';' add? ')' stmt_block?;
+if : IF '(' expr ')' stmt_block elif* else? ;
+elif : ELIF '(' expr ')' stmt_block ;
+else : ELSE stmt_block ;
+while : WHILE '(' expr ')' stmt_block ;
+for : FOR '(' definition? ';' logical? ';' assign? ')' stmt_block ;
 
-return : 'return' expr;
+return : RETURN expr ;
 
-fun : 'fun' IDENT? '(' args? ')' stmt_block;
-args : IDENT (',' IDENT)* ;
-
-fun_call : ( IDENT | fun) | fun_call '(' args_call? ')' ;
-args_call : expr (',' expr)* ;
-
-
-definition : 'var' assign ;
-assign : IDENT '=' (expr | fun) ;
+definition : VAR IDENT '=' (expr | fun) ;
+assign : call '=' (expr | fun) ;
 
 // BASE
-expr : add | logical;
-logical: (compare|not) (LOGICAL_OPERATORS (compare|not))*;
-not: NOT_LOGICAL_OPERATOR (compare|not);
-compare : add (COMPARE add)*;
-add : mult (ADD mult)* ;
-mult : group (MULT group)* ;
-group : IDENT | NULL | UNDEFINED | BOOL | NUM | DOUBLE | STRING_LITERAL | '(' expr ')' | array_literal | object_literal | fun_call;
+expr : logical;
+logical
+    : compare
+    | NOT_LOGICAL_OPERATOR not_operand=logical
+    | left=logical LOGICAL_OPERATORS right=logical
+    ;
+compare
+    : add
+    | left=compare COMPARE right=compare
+    ;
+add
+    : mult
+    | left=add ADD right=add
+    ;
+mult
+    : unary
+    | left=mult MULT right=mult
+    ;
+unary
+    : call
+    | ADD unary_add_operand=unary
+    | MULT unary_mult_operand=unary
+    ;
+call
+    : group #group_call
+    | call '(' (expr (',' expr)*)? ')' #fun_call
+    | call '.' IDENT #object_call
+    | call '[' index=expr ']' #array_call
+    ;
+group
+    : primitive #primitive_group
+    | fun #fun_group
+    | array_literal #array_literal_group
+    | object_literal #object_literal_group
+    | '(' expr ')' #expr_group
+    ;
+
+primitive
+    : NULL
+    | UNDEFINED
+    | BOOL
+    | NUM
+    | DOUBLE
+    | STRING_LITERAL
+    | IDENT
+    ;
 
 // TYPES
-STRING_LITERAL: '"' STRING* '"';
-array_literal: '[' ((expr | fun) ','?)* ']';
-object_literal: '{' (field ','?)* '}';
+fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
+array_literal : '[' (array_element (',' array_element)*)? ']';
+array_element : expr | fun;
+STRING_LITERAL: '"' [a-zA-Z0-9 ,'!@#$%^&*()_+№;?=]* '"';
+object_literal: '{' (field (',' field)*)? '}';
 field: IDENT ':' (expr | fun);
 
-//
-
-OPERATORS : ('if' | 'else' | 'while' | 'for' | 'fun') ;
+IF: 'if' ;
+ELIF : 'elif' ;
+ELSE : 'else' ;
+WHILE : 'while' ;
+FOR : 'for' ;
+RETURN : 'return' ;
+FUN : 'fun' ;
 GOTO : 'continue' | 'break' ;
 LOGICAL_OPERATORS : 'or' | 'and' ;
 NOT_LOGICAL_OPERATOR : 'not';
+VAR : 'var' ;
 
 IDENT: (CHAR | '_')(CHAR | NUM | '_')* ;
 
 // TYPES
 CHAR : ([a-z] | [A-Z]) ;
-STRING : (CHAR)+;
 NUM : [0-9]+ ;
 DOUBLE : [0-9]*[.][0-9]* ;
 BOOL : 'false' | 'true' ;
@@ -63,5 +112,5 @@ COMPARE : '>' | '<' | '>=' | '<=' | '==' | '!=' ;
 ADD : '+' | '-' ;
 MULT : '*' | '/' | '//' | '/%' ;
 
-WS : [ \t\r\n] -> skip ;
-COMMENT : (START_COMMENT ' '* STRING* END_COMMENT?) -> skip  ;
+WS : [ \t\r\n] -> channel(HIDDEN) ;
+COMMENT : (START_COMMENT ' '* [a-zA-Z0-9 ]* END_COMMENT?) -> skip  ;
