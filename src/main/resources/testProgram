@@ -1,4 +1,2 @@
-for (var a = 1; a < 2; a = a + 2) {
-    var c = 3 * (5 + 2) + (3 + 1)
-    return c[2].foo(a,b)[0]
-}
+var a
+a = 3
