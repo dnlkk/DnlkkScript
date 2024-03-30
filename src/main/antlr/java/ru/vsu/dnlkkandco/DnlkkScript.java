@@ -8,9 +8,6 @@ import ru.vsu.dnlkkandco.gen.DnlkkRulesParser;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import static ru.vsu.dnlkkandco.Parser.parseTree;
-import static ru.vsu.dnlkkandco.Parser.printTree;
-
 public class DnlkkScript {
     public static void main(String[] args) throws IOException {
         FileInputStream inputStream = new FileInputStream("src/main/resources/testProgram");
@@ -32,31 +29,6 @@ public class DnlkkScript {
             System.err.println("Parsing error");
             System.err.println(e.getMessage());
         }
-    }
-
-    static String treeView(ParseTree tree) {
-        return treeViewInner(tree, new StringBuffer(), "", "", "").toString();
-    }
-
-    static StringBuffer treeViewInner(ParseTree tree, StringBuffer out, String prevPrefix, String prefixLine, String prefixNode) {
-        String line = prevPrefix + prefixNode;
-        if (tree.getChildCount() == 0) {
-            line += tree.getText();
-        } else {
-            String className = tree.getClass().toString();
-            int nodeIndexBegin = className.indexOf('$') + 1;
-            int nodeIndexEnd = className.indexOf("Context");
-            String nodeName = className.substring(nodeIndexBegin, nodeIndexEnd);
-            line += nodeName;
-        }
-        out.append(line).append('\n');
-        for (int i = 0; i < tree.getChildCount(); i++) {
-            boolean last = i == tree.getChildCount() - 1;
-            String nextLevelPrefix = last ? "  " : "│ ";
-            String nodePrefix = last ? "└─" : "├─";
-            treeViewInner(tree.getChild(i), out, prevPrefix + prefixLine, nextLevelPrefix, nodePrefix);
-        }
-        return out;
     }
 
     static String treeViewAst(AstNode tree) {
