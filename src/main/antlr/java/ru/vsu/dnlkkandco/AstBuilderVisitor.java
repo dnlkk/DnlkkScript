@@ -60,11 +60,11 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitDefinition(DnlkkRulesParser.DefinitionContext ctx) {
-        AstNode ident = new TerminalAstNode(ctx.assign().IDENT().getText());
+        AstNode ident = new TerminalAstNode(ctx.IDENT().getText());
         AstNode value =
-                ctx.assign().expr() != null ?
-                        visitExpr(ctx.assign().expr()) :
-                        visitFun(ctx.assign().fun());
+                ctx.expr() != null ?
+                        visitExpr(ctx.expr()) :
+                        visitFun(ctx.fun());
         return new BinOpNode("var", ident, value);
     }
 
@@ -225,7 +225,7 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
     }
     @Override
     public AstNode visitAssign(DnlkkRulesParser.AssignContext ctx) {
-        AstNode variable = new TerminalAstNode(ctx.IDENT().getText());
+        AstNode variable = visit(ctx.call());
         AstNode value = ctx.expr() != null ? visitExpr(ctx.expr()) : visitFun(ctx.fun());
         return new AssignNode(variable, value);
     }
