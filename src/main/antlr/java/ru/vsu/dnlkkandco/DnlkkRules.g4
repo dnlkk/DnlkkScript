@@ -78,7 +78,7 @@ primitive
 fun : FUN fun_ident=IDENT? '(' (IDENT (',' IDENT)*)? ')' stmt_block ;
 array_literal : '[' (array_element (',' array_element)*)? ']';
 array_element : expr | fun;
-STRING_LITERAL: '"' [a-zA-Z0-9 ,'!@#$%^&*()_+№;?=]* '"';
+STRING_LITERAL: '"' [a-zA-Z0-9\u0430-\u044F\u0410-\u042F\u0451\u0401 ,'!@#$%^&*()_+№;?=]* '"';
 object_literal: '{' (field (',' field)*)? '}';
 field: IDENT ':' (expr | fun);
 
@@ -97,7 +97,7 @@ VAR : 'var' ;
 IDENT: (CHAR | '_')(CHAR | NUM | '_')* ;
 
 // TYPES
-CHAR : ([a-z] | [A-Z]) ;
+CHAR : ([a-z] | [A-Z] | [\u0430-\u044F] | [\u0410-\u042F] | [\u0451] | [\u0401]) ;
 NUM : [0-9]+ ;
 DOUBLE : [0-9]*[.][0-9]* ;
 BOOL : 'false' | 'true' ;
@@ -113,4 +113,4 @@ ADD : '+' | '-' ;
 MULT : '*' | '/' | '//' | '/%' ;
 
 WS : [ \t\r\n] -> channel(HIDDEN) ;
-COMMENT : (START_COMMENT ' '* [a-zA-Z0-9 ]* END_COMMENT?) -> skip  ;
+COMMENT : (START_COMMENT [a-zA-Z0-9\u0430-\u044F\u0410-\u042F\u0451\u0401 ]* END_COMMENT?) -> skip  ;
