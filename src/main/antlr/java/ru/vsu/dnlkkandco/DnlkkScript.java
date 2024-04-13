@@ -7,6 +7,7 @@ import ru.vsu.dnlkkandco.gen.DnlkkRulesParser;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 
 public class DnlkkScript {
     public static void main(String[] args) throws IOException {
@@ -29,6 +30,8 @@ public class DnlkkScript {
             System.err.println("Parsing error");
             System.err.println(e.getMessage());
         }
+
+
     }
 
     static String treeViewAst(AstNode tree) {
