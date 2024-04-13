@@ -4,22 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AstNode {
-    private TerminalAstNode terminalAstNode;
-
-    private ProgramNode programNode;
-
-    private BlockNode blockNode;
-
-    private BinOpNode binOpNode;
-
-    private UnaryOpNode unaryOpNode;
-
-    private ObjectCallNode objectCallNode;
-
-    private ArrayCallNode arrayCallNode;
-
-    private FunctionCallNode functionCallNode;
-
 
     private final String name;
     protected final List<AstNode> children;
@@ -102,6 +86,16 @@ class BinOpNode extends AstNode {
 
     private AstNode right;
 
+    private String op;
+
+    public String getOp() {
+        return op;
+    }
+
+    public void setOp(String op) {
+        this.op = op;
+    }
+
     public AstNode getLeft() {
         return left;
     }
@@ -128,6 +122,16 @@ class BinOpNode extends AstNode {
 class UnaryOpNode extends AstNode {
 
     private AstNode child;
+
+    private String op;
+
+    public String getOp() {
+        return op;
+    }
+
+    public void setOp(String op) {
+        this.op = op;
+    }
 
     public AstNode getChild() {
         return child;
@@ -205,6 +209,8 @@ class FunctionCallNode extends AstNode {
 
     private AstNode func;
 
+    private List<AstNode> args;
+
     public AstNode getFunc() {
         return func;
     }
@@ -221,7 +227,7 @@ class FunctionCallNode extends AstNode {
         this.args = args;
     }
 
-    private List<AstNode> args;
+
 
     public FunctionCallNode(AstNode func, List<AstNode> args) {
         super("fun_call");
