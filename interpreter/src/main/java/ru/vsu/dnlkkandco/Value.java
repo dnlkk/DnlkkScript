@@ -1,24 +1,16 @@
 package ru.vsu.dnlkkandco;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+public abstract class Value<T> {
+    private T value;
 
-public class Value {
-    private final ValueType type;
-    private final Object value;
-    private final Map<String, Value> members;
-    private final List<Value> indexable;
+    public Value(ValueType type) {}
 
-    public Value(ValueType type, Object value) {
-        this.type = type;
-        this.value = value;
-        members = new HashMap<>();
-        indexable = new ArrayList<>();
-    }
-
-    public ValueType getType() {
-        return type;
-    }
+    public abstract ValueType getType();
+    public NumValue asNum() {throw new UnsupportedOperationException("Cannot convert to NumValue");};
+    public DoubleValue asDouble() {throw new UnsupportedOperationException("Cannot convert to DoubleValue");};
+    public BoolValue asBool() {throw new UnsupportedOperationException("Cannot convert to BoolValue");};
+    public StringValue asString() {throw new UnsupportedOperationException("Cannot convert to StringValue");};
+    public FunctionValue asFunction() {throw new UnsupportedOperationException("Cannot convert to FunctionValue");};
+    public ArrayValue asArray() {throw new UnsupportedOperationException("Cannot convert to ArrayValue");};
+    public ObjectValue asObject() {throw new UnsupportedOperationException("Cannot convert to ObjectValue");};
 }
