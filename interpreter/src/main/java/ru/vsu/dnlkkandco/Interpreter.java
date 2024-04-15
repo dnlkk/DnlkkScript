@@ -48,81 +48,114 @@ public class Interpreter {
         // processor register
         int ip = labels.get("main");
 
+
         while (ip < commands.size()) {
             InterpreterCommand command = commands.get(ip++);
+            try {
+                switch (command.operation()) {
+                    case "POP" -> stack.pop();
+                    case "PUSH" -> stack.push(command.argument());
+                    case "SET" -> {
+                        String var = getAsVar(stack.pop());
+                        String argument = stack.pop();
+                        context.setVariable(var, argumentToValue(argument));
+                    }
+                    case "LOAD" -> {
+                        String var = getAsVar(stack.pop());
+                        Value<?> val = context.get(var);
+                        stack.push(val.toString());
+                    }
+                    case "ADD", "SUB", "MUL", "DIV", "MOD", "EQ", "NEQ", "GT", "GTE", "LT", "LTE" -> {
+                        Value<?> val1 = argumentToValue(stack.pop());
+                        Value<?> val2 = argumentToValue(stack.pop());
+                        Value<?> result = Operation.binaryImplementation
+                                .get(Operation.Binary.valueOf(command.operation()))
+                                .get(val1.getType()).apply(val1, val2);
+                        stack.push(result.toString());
+                    }
+                    case "NEG", "NOT" -> {
+                        Value<?> val = argumentToValue(stack.pop());
+                        Value<?> result = Operation.unaryImplementation
+                                .get(Operation.Unary.valueOf(command.operation()))
+                                .get(val.getType()).apply(val);
+                        stack.push(result.toString());
+                    }
+                    case "JMF", "JMT" -> {
+                        Value<?> val = argumentToValue(stack.pop());
+                        if (val.getType() != ValueType.BOOL) {
+                            throw new RuntimeException("Illegal value '" + val + "'");
+                        }
+                        boolean jump = command.operation().equals("JMT") ? val.asBool().getValue() : !val.asBool().getValue();
+                        if (jump) {
+                            ip = labels.get(command.argument());
+                        }
+                    }
+                    case "JMP" -> ip = labels.get(command.argument());
+                    case "NEWARRAY" -> {
+                        String ref = stack.pop();
+                        if (!ref.startsWith(REFERENCE_MARKER)) {
+                            throw new RuntimeException("Invalid reference: " + ref);
+                        }
+                        ref = ref.substring(1);
+                        if (!context.containsVariable(ref)) {
+                            context.setReference(ref, new ArrayValue(ref, new ArrayList<>()));
+                        }
+                    }
+                    case "ASET" -> {
+                        ArrayValue array = argumentToValue(stack.pop()).asArray();
+                        int index = argumentToValue(stack.pop()).asNum().getValue();
+                        Value<?> value = argumentToValue(stack.pop());
 
-            switch (command.operation()) {
-                case "POP" -> stack.pop();
-                case "PUSH" -> stack.push(command.argument());
-                case "SET" -> {
-                    String var = getAsVar(stack.pop());
-                    String argument = stack.pop();
-                    context.setVariable(var, argumentToValue(argument));
-                }
-                case "NEWARRAY" -> {
-                    String ref = stack.pop();
-                    if (!ref.startsWith(REFERENCE_MARKER)) {
-                        throw new RuntimeException("Invalid reference: " + ref);
+                        while (array.getValue().size() <= index) {
+                            array.getValue().add(new UndefinedValue());
+                        }
+                        array.getValue().set(index, value);
                     }
-                    ref = ref.substring(1);
-                    if (!context.containsVariable(ref)) {
-                        context.setReference(ref, new ArrayValue(ref, new ArrayList<>()));
-                    }
-                }
-                case "LOAD" -> {
-                    String var = getAsVar(stack.pop());
-                    Value<?> val = context.get(var);
-                    stack.push(val.toString());
-                }
-                case "ADD", "SUB", "MUL", "DIV", "MOD", "EQ", "NEQ", "GT", "GTE", "LT", "LTE" -> {
-                    Value<?> val1 = argumentToValue(stack.pop());
-                    Value<?> val2 = argumentToValue(stack.pop());
-                    Value<?> result = Operation.binaryImplementation
-                            .get(Operation.Binary.valueOf(command.operation()))
-                            .get(val1.getType()).apply(val1, val2);
-                    stack.push(result.toString());
-                }
-                case "NEG", "NOT" -> {
-                    Value<?> val = argumentToValue(stack.pop());
-                    Value<?> result = Operation.unaryImplementation
-                            .get(Operation.Unary.valueOf(command.operation()))
-                            .get(val.getType()).apply(val);
-                    stack.push(result.toString());
-                }
-                case "JMF", "JMT" -> {
-                    Value<?> val = argumentToValue(stack.pop());
-                    if (val.getType() != ValueType.BOOL) {
-                        throw new RuntimeException("Illegal value '" + val + "'");
-                    }
-                    boolean jump = command.operation().equals("JMT") ? val.asBool().getValue() : !val.asBool().getValue();
-                    if (jump) {
-                        ip = labels.get(command.argument());
-                    }
-                }
-                case "JMP" -> ip = labels.get(command.argument());
-                case "ASET" -> {
-                    ArrayValue array = argumentToValue(stack.pop()).asArray();
-                    int index = argumentToValue(stack.pop()).asNum().getValue();
-                    Value<?> value = argumentToValue(stack.pop());
+                    case "ALOAD" -> {
+                        ArrayValue array = argumentToValue(stack.pop()).asArray();
+                        int index = argumentToValue(stack.pop()).asNum().getValue();
 
-                    while (array.getValue().size() <= index) {
-                        array.getValue().add(new UndefinedValue());
+                        if (array.getValue().size() <= index) {
+                            stack.push(new UndefinedValue().toString());
+                        } else {
+                            stack.push(array.getValue().get(index).toString());
+                        }
                     }
-                    array.getValue().set(index, value);
-                }
-                case "ALOAD" -> {
-                    ArrayValue array = argumentToValue(stack.pop()).asArray();
-                    int index = argumentToValue(stack.pop()).asNum().getValue();
+                    case "NEWOBJECT" -> {
+                        String ref = stack.pop();
+                        if (!ref.startsWith(REFERENCE_MARKER)) {
+                            throw new RuntimeException("Invalid reference: " + ref);
+                        }
+                        ref = ref.substring(1);
+                        if (!context.containsVariable(ref)) {
+                            context.setReference(ref, new ObjectValue(ref, new HashMap<>()));
+                        }
+                    }
+                    case "SETFIELD" -> {
+                        ObjectValue object = argumentToValue(stack.pop()).asObject();
+                        String fieldName = argumentToValue(stack.pop()).asString().getValue();
+                        Value<?> value = argumentToValue(stack.pop());
+                        object.getValue().put(fieldName, value);
+                    }
+                    case "GETFIELD" -> {
+                        ObjectValue object = argumentToValue(stack.pop()).asObject();
+                        String fieldName = argumentToValue(stack.pop()).asString().getValue();
 
-                    if (array.getValue().size() <= index) {
-                        stack.push(new UndefinedValue().toString());
-                    } else {
-                        stack.push(array.getValue().get(index).toString());
+                        if (object.getValue().containsKey(fieldName)) {
+                            stack.push(object.getValue().get(fieldName).toString());
+                        } else {
+                            stack.push(new UndefinedValue().toString());
+                        }
+                    }
+                    case "HALT" -> {
+                        return;
                     }
                 }
-                case "HALT" -> {
-                    return;
-                }
+            } catch (Exception e) {
+                System.err.println("Error on line: " + command.lineNumber());
+                System.err.println(e.getMessage());
+                e.printStackTrace();
+                break;
             }
         }
 
@@ -153,11 +186,11 @@ public class Interpreter {
                 } else {
                     int delimiterIndex = line.indexOf(" ");
                     if (delimiterIndex == -1) {
-                        commands.add(new InterpreterCommand(line.toUpperCase(), null));
+                        commands.add(new InterpreterCommand(line.toUpperCase(), null, lineNumber));
                     } else {
                         String operation = line.substring(0, delimiterIndex);
                         String argument = line.substring(delimiterIndex + 1);
-                        commands.add(new InterpreterCommand(operation.toUpperCase(), argument));
+                        commands.add(new InterpreterCommand(operation.toUpperCase(), argument, lineNumber));
                     }
                 }
             }

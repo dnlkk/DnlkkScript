@@ -16,6 +16,11 @@ public class ObjectValue extends ReferenceValue<Map<String, Value<?>>> {
     }
 
     @Override
+    public ObjectValue asObject() {
+        return this;
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(getValue());
     }

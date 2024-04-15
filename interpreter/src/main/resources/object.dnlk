@@ -1,0 +1,42 @@
+#main
+    push @obj
+    newobject
+
+    push "Pavel"
+    push "name"
+    push @obj
+    setfield
+
+    push @marks
+    newarray
+
+    push N50
+    push N0
+    push @marks
+    aset
+
+    push D49.5
+    push N1
+    push @marks
+    aset
+
+    push @marks
+    push "marks"
+    push @obj
+    setfield
+
+    push @obj
+    push "human"
+    set
+
+    push "name"
+    push "human"
+    load
+    getfield
+
+    push N1
+    push "marks"
+    push "human"
+    load
+    getfield
+    aload
