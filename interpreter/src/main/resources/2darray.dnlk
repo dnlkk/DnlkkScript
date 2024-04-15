@@ -1,0 +1,31 @@
+#main
+    push @inner
+    newarray
+
+    push @outter
+    newarray
+
+    push @outter
+    push "array"
+    set
+
+    push @inner
+    push N0
+    push "array"
+    load
+    aset
+
+    push "hello world"
+    push N0
+    push N0
+    push "array"
+    load
+    aload
+    aset
+
+    push N0
+    push N0
+    push "array"
+    load
+    aload
+    aload

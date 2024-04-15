@@ -1,0 +1,17 @@
+#main
+    push @array
+    NEWARRAY
+    push @array
+    push "array"
+    set
+    push "hello"
+    push N0
+    push "array"
+    load
+    aset
+    push " world"
+    push N0
+    push "array"
+    load
+    aload
+    add

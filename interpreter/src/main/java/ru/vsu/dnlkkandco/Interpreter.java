@@ -57,7 +57,6 @@ public class Interpreter {
                 case "SET" -> {
                     String var = getAsVar(stack.pop());
                     String argument = stack.pop();
-
                     context.setVariable(var, argumentToValue(argument));
                 }
                 case "NEWARRAY" -> {
@@ -101,11 +100,34 @@ public class Interpreter {
                     }
                 }
                 case "JMP" -> ip = labels.get(command.argument());
+                case "ASET" -> {
+                    ArrayValue array = argumentToValue(stack.pop()).asArray();
+                    int index = argumentToValue(stack.pop()).asNum().getValue();
+                    Value<?> value = argumentToValue(stack.pop());
+
+                    while (array.getValue().size() <= index) {
+                        array.getValue().add(new UndefinedValue());
+                    }
+                    array.getValue().set(index, value);
+                }
+                case "ALOAD" -> {
+                    ArrayValue array = argumentToValue(stack.pop()).asArray();
+                    int index = argumentToValue(stack.pop()).asNum().getValue();
+
+                    if (array.getValue().size() <= index) {
+                        stack.push(new UndefinedValue().toString());
+                    } else {
+                        stack.push(array.getValue().get(index).toString());
+                    }
+                }
                 case "HALT" -> {
                     return;
                 }
             }
         }
+
+        // todo: to remove
+        System.out.println(stack.peek());
     }
 
     private void preprocess() throws IOException {

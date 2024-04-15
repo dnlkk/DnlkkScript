@@ -13,7 +13,7 @@ public class ArrayValue extends ReferenceValue<List<Value<?>>> {
 
     @Override
     public ValueType getType() {
-        return ValueType.FUNCTION;
+        return ValueType.ARRAY;
     }
 
     @Override
