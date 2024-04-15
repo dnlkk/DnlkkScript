@@ -10,17 +10,18 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Interpreter {
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws IOException {
+        Path source = Path.of(args[0]);
+        Interpreter interpreter = new Interpreter(source);
+        interpreter.exec();
     }
 
     private static final String LABEL_MARKER = "#";
 
     private final Path source;
     private final Map<String, Integer> labels;
-    private final List<String> commands;
+    private final List<InterpreterCommand> commands;
     private boolean preprocessed = false;
-    private int ip; // processor register
     private final Deque<String> stack;
 
     public Interpreter(Path source) {
@@ -37,17 +38,16 @@ public class Interpreter {
         }
 
         assert labels.containsKey("main");
-        ip = labels.get("main");
+        // processor register
+        int ip = labels.get("main");
         Context context = new Context(null);
 
         while (ip < commands.size()) {
-            String command = commands.get(ip++);
-            String operation = command.substring(0, command.indexOf(" ")).toUpperCase();
-            String argument = command.substring(command.indexOf(" ") + 1);
+            InterpreterCommand command = commands.get(ip++);
 
-            switch (operation) {
+            switch (command.operation()) {
                 case "POP" -> stack.pop();
-                case "PUSH" -> stack.push(argument);
+                case "PUSH" -> stack.push(command.argument());
                 case "SET" -> {
                     String var = stack.pop();
                     StringValue val = new StringValue(stack.pop());
@@ -73,40 +73,32 @@ public class Interpreter {
     private void preprocess() throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(source.toFile()))) {
             String line;
-            int lineNumber = 1;
+            int lineNumber = 0;
             while ((line = reader.readLine()) != null) {
-                String[] tokens = line.split(" ");
+                line = line.trim();
+                lineNumber++;
+                if (line.isBlank()) continue;
 
-                if (!tokens[0].startsWith(LABEL_MARKER))
-                    continue;
-
-                String label = tokens[0].substring(1);
-                if (label.isEmpty()) {
-                    throw new LabelIsEmptyException("Empty label");
-                }
-
-                if (labels.containsKey(label)) {
-                    throw new DuplicateLabelException("Duplicate label: " + label + " on line " + lineNumber);
-                }
-
-                try {
-                    int jumpNumber = Integer.parseInt(tokens[1]);
-                    if (jumpNumber < 0) {
-                        throw new NegativeJumpTargetException("Negative jump number: " + jumpNumber + " on line " + lineNumber);
+                if (line.startsWith(LABEL_MARKER)) {
+                    String label = line.substring(1);
+                    if (label.isEmpty()) {
+                        throw new LabelIsEmptyException("Empty label");
                     }
-                    labels.put(label, jumpNumber);
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    throw new NoJumpTargetException("Bad label: " + label + " on line " + lineNumber);
-                } catch (NumberFormatException e) {
-                    throw new CantParseJumpTargetException("Can't parse jump destination for " + label + " on line " + lineNumber);
-                }
 
-                commands.add(line);
-            }
+                    if (labels.containsKey(label)) {
+                        throw new DuplicateLabelException("Duplicate label: " + label + " on line " + lineNumber);
+                    }
 
-            for (var labelsEntry : labels.entrySet()) {
-                if (labelsEntry.getValue() > commands.size()) {
-                    throw new OutOfBoundsJumpTargetException("Out of bounds jump target: " + labelsEntry.getValue() + " for label " + labelsEntry.getKey());
+                    labels.put(label, commands.size());
+                } else {
+                    int delimiterIndex = line.indexOf(" ");
+                    if (delimiterIndex == -1) {
+                        commands.add(new InterpreterCommand(line.toUpperCase(), null));
+                    } else {
+                        String operation = line.substring(0, delimiterIndex);
+                        String argument = line.substring(delimiterIndex + 1);
+                        commands.add(new InterpreterCommand(operation.toUpperCase(), argument));
+                    }
                 }
             }
 
@@ -119,30 +111,14 @@ public class Interpreter {
     }
 
     private static class LabelIsEmptyException extends RuntimeException {
-        public LabelIsEmptyException(String label) {}
+        public LabelIsEmptyException(String label) {super(label);}
     }
 
     private static class DuplicateLabelException extends RuntimeException {
-        public DuplicateLabelException(String label) {}
-    }
-
-    private static class NoJumpTargetException extends RuntimeException {
-        public NoJumpTargetException(String label) {}
-    }
-
-    private static class CantParseJumpTargetException extends RuntimeException {
-        public CantParseJumpTargetException(String label) {}
-    }
-
-    private static class NegativeJumpTargetException extends RuntimeException {
-        public NegativeJumpTargetException(String label) {}
-    }
-
-    private static class OutOfBoundsJumpTargetException extends RuntimeException {
-        public OutOfBoundsJumpTargetException(String label) {}
+        public DuplicateLabelException(String label) {super(label);}
     }
 
     private static class NoMainLabelException extends RuntimeException {
-        public NoMainLabelException(String label) {}
+        public NoMainLabelException(String label) {super(label);}
     }
 }

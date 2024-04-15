@@ -26,7 +26,7 @@ public class Context implements Iterable<Context> {
     public Value<?> get(String varName) {
         for (var context : this) {
             if (context.containsVariable(varName)) {
-                return context.get(varName);
+                return context.variables.get(varName);
             }
         }
         throw new NoSuchElementException("No such variable: " + varName);

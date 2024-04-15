@@ -1,0 +1,6 @@
+#main
+push hello world
+push greeting
+set
+push greeting
+load
