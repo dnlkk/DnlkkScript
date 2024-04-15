@@ -37,9 +37,21 @@ public class Context implements Iterable<Context> {
         references.put(key, value);
     }
 
+    public boolean containsReference(String key) {
+        return references.containsKey(key);
+    }
+
     public Value<?> getReference(String refName) {
-        Optional<Value<?>> value = Optional.ofNullable(references.get(refName));
-        return value.orElseThrow(() -> new NoSuchElementException("No such reference: " + refName));
+        for (var context : this) {
+            if (context.containsReference(refName)) {
+                return context.references.get(refName);
+            }
+        }
+        throw new NoSuchElementException("No such variable: " + refName);
+    }
+
+    public Context getParent() {
+        return parent;
     }
 
     @Override

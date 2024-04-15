@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class Interpreter {
     public static void main(String[] args) throws IOException {
@@ -29,6 +30,7 @@ public class Interpreter {
     private final List<InterpreterCommand> commands;
     private boolean preprocessed = false;
     private final Deque<String> stack;
+    private final Deque<Integer> ipStack;
     private Context context = new Context(null);
 
     public Interpreter(Path source) {
@@ -36,6 +38,7 @@ public class Interpreter {
         labels = new HashMap<>();
         commands = new ArrayList<>();
         stack = new ArrayDeque<>();
+        ipStack = new ArrayDeque<>();
     }
 
     public void exec() throws IOException {
@@ -92,11 +95,7 @@ public class Interpreter {
                     }
                     case "JMP" -> ip = labels.get(command.argument());
                     case "NEWARRAY" -> {
-                        String ref = stack.pop();
-                        if (!ref.startsWith(REFERENCE_MARKER)) {
-                            throw new RuntimeException("Invalid reference: " + ref);
-                        }
-                        ref = ref.substring(1);
+                        String ref = getAsRef(stack.pop());
                         if (!context.containsVariable(ref)) {
                             context.setReference(ref, new ArrayValue(ref, new ArrayList<>()));
                         }
@@ -122,11 +121,7 @@ public class Interpreter {
                         }
                     }
                     case "NEWOBJECT" -> {
-                        String ref = stack.pop();
-                        if (!ref.startsWith(REFERENCE_MARKER)) {
-                            throw new RuntimeException("Invalid reference: " + ref);
-                        }
-                        ref = ref.substring(1);
+                        String ref = getAsRef(stack.pop());
                         if (!context.containsVariable(ref)) {
                             context.setReference(ref, new ObjectValue(ref, new HashMap<>()));
                         }
@@ -147,6 +142,42 @@ public class Interpreter {
                             stack.push(new UndefinedValue().toString());
                         }
                     }
+                    case "NEWFUNC" -> {
+                        String ref = getAsRef(stack.pop());
+                        String label = getAsLabel(stack.pop());
+
+                        int argc = argumentToValue(stack.pop()).asNum().getValue();
+                        String[] args = new String[argc];
+                        IntStream.range(0, argc)
+                                .forEach(i -> args[i] = stack.pop());
+                        FunctionValue function = new FunctionValue(ref, label, args);
+                        context.setReference(ref, function);
+                    }
+                    case "CALLFUNC" -> {
+                        String ref = getAsRef(stack.pop());
+                        int argc = argumentToValue(stack.pop()).asNum().getValue();
+                        Value<?>[] args = new Value<?>[argc];
+                        IntStream.range(0, argc)
+                                .forEach(i -> args[i] = argumentToValue(stack.pop()));
+
+                        FunctionValue function = context.get(ref).asFunction();
+                        Context funcContext = new Context(context);
+                        for (int i = 0; i < function.getArgs().length; i++) {
+                            if (i >= argc) {
+                                funcContext.setVariable(function.getArgs()[i], new UndefinedValue());
+                            } else {
+                                funcContext.setVariable(function.getArgs()[i], args[i]);
+                            }
+                        }
+                        ipStack.push(ip);
+
+                        context = funcContext;
+                        ip = labels.get(function.getCodeBodyLabel());
+                    }
+                    case "RETURN" -> {
+                        context = context.getParent();
+                        ip = ipStack.pop() + 1;
+                    }
                     case "HALT" -> {
                         return;
                     }
@@ -161,6 +192,17 @@ public class Interpreter {
 
         // todo: to remove
         System.out.println(stack.peek());
+    }
+
+    private String getAsLabel(String label) {
+        if (!label.startsWith(LABEL_MARKER)) {
+            throw new RuntimeException("Illegal label '" + label + "'");
+        }
+        label = label.substring(1);
+        if (!labels.containsKey(label)) {
+            throw new RuntimeException("Illegal label '" + label + "'");
+        }
+        return label;
     }
 
     private void preprocess() throws IOException {
@@ -229,6 +271,13 @@ public class Interpreter {
             throw new RuntimeException("Illegal variable '" + var + "'");
         }
         return var.substring(1, var.length() - 1);
+    }
+
+    private String getAsRef(String ref) {
+        if (!ref.startsWith(REFERENCE_MARKER)) {
+            throw new RuntimeException("Invalid reference: " + ref);
+        }
+        return ref.substring(1);
     }
 
     private static class LabelIsEmptyException extends RuntimeException {
