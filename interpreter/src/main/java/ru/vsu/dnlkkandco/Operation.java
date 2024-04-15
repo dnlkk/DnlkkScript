@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public class Operation {
     public enum Binary {
-        ADD, SUB, MUL, DIV, MOD, AND, OR, EQUAL, NOTEQUAL, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL,
+        ADD, SUB, MUL, DIV, MOD, AND, OR, EQ, NEQ, LT, LTE, GT, GTE,
     }
 
     @FunctionalInterface
@@ -71,7 +71,7 @@ public class Operation {
         equal.put(ValueType.FUNCTION, (v1, v2) -> new BoolValue(v1.asFunction().equals(v2.asFunction())));
         equal.put(ValueType.ARRAY, (v1, v2) -> new BoolValue(v1.asArray().equals(v2.asArray())));
         equal.put(ValueType.OBJECT, (v1, v2) -> new BoolValue(v1.asObject().equals(v2.asObject())));
-        binaryImplementation.put(Binary.EQUAL, equal);
+        binaryImplementation.put(Binary.EQ, equal);
 
         Map<ValueType, BinaryOperation> notequal = new HashMap<>();
         notequal.put(ValueType.NULL, (_, v) -> new BoolValue(!v.getType().equals(ValueType.NULL)));
@@ -83,31 +83,31 @@ public class Operation {
         notequal.put(ValueType.FUNCTION, (v1, v2) -> new BoolValue(!v1.asFunction().equals(v2.asFunction())));
         notequal.put(ValueType.ARRAY, (v1, v2) -> new BoolValue(!v1.asArray().equals(v2.asArray())));
         notequal.put(ValueType.OBJECT, (v1, v2) -> new BoolValue(!v1.asObject().equals(v2.asObject())));
-        binaryImplementation.put(Binary.NOTEQUAL, notequal);
+        binaryImplementation.put(Binary.NEQ, notequal);
 
         Map<ValueType, BinaryOperation> less = new HashMap<>();
         less.put(ValueType.NUM, (v1, v2) -> new BoolValue(v1.asNum().compareTo(v2.asNum()) < 0));
         less.put(ValueType.DOUBLE, (v1, v2) -> new BoolValue(v1.asDouble().compareTo(v2.asDouble()) < 0));
         less.put(ValueType.STRING, (v1, v2) -> new BoolValue(v1.asString().compareTo(v2.asString()) < 0));
-        binaryImplementation.put(Binary.LESS, less);
+        binaryImplementation.put(Binary.LT, less);
 
         Map<ValueType, BinaryOperation> lessEqual = new HashMap<>();
         lessEqual.put(ValueType.NUM, (v1, v2) -> new BoolValue(v1.asNum().compareTo(v2.asNum()) <= 0));
         lessEqual.put(ValueType.DOUBLE, (v1, v2) -> new BoolValue(v1.asDouble().compareTo(v2.asDouble()) <= 0));
         lessEqual.put(ValueType.STRING, (v1, v2) -> new BoolValue(v1.asString().compareTo(v2.asString()) <= 0));
-        binaryImplementation.put(Binary.LESS_EQUAL, lessEqual);
+        binaryImplementation.put(Binary.LTE, lessEqual);
 
         Map<ValueType, BinaryOperation> greater = new HashMap<>();
         greater.put(ValueType.NUM, (v1, v2) -> new BoolValue(v1.asNum().compareTo(v2.asNum()) > 0));
         greater.put(ValueType.DOUBLE, (v1, v2) -> new BoolValue(v1.asDouble().compareTo(v2.asDouble()) > 0));
         greater.put(ValueType.STRING, (v1, v2) -> new BoolValue(v1.asString().compareTo(v2.asString()) > 0));
-        binaryImplementation.put(Binary.GREATER, greater);
+        binaryImplementation.put(Binary.GT, greater);
 
         Map<ValueType, BinaryOperation> greaterEqual = new HashMap<>();
         greaterEqual.put(ValueType.NUM, (v1, v2) -> new BoolValue(v1.asNum().compareTo(v2.asNum()) >= 0));
         greaterEqual.put(ValueType.DOUBLE, (v1, v2) -> new BoolValue(v1.asDouble().compareTo(v2.asDouble()) >= 0));
         greaterEqual.put(ValueType.STRING, (v1, v2) -> new BoolValue(v1.asString().compareTo(v2.asString()) >= 0));
-        binaryImplementation.put(Binary.LESS_EQUAL, greaterEqual);
+        binaryImplementation.put(Binary.GTE, greaterEqual);
 
 
         // UNARY OPERATIONS

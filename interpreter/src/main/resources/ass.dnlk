@@ -1,6 +1,18 @@
 #main
-push N5
-push N3
-add
-push N2
-add
+    push N0
+    push "i"
+    set
+    #while
+        push N5
+        push "i"
+        load
+        lt
+        jmf end
+        push N1
+        push "i"
+        load
+        add
+        push "i"
+        set
+        jmp while
+    #end

@@ -55,11 +55,7 @@ public class Interpreter {
                 case "POP" -> stack.pop();
                 case "PUSH" -> stack.push(command.argument());
                 case "SET" -> {
-                    String var = stack.pop();
-                    if (!(var.startsWith("\"") && var.endsWith("\""))) {
-                        throw new RuntimeException("Illegal variable '" + var + "'");
-                    }
-                    var = var.substring(1, var.length() - 1);
+                    String var = getAsVar(stack.pop());
                     String argument = stack.pop();
 
                     context.setVariable(var, argumentToValue(argument));
@@ -75,15 +71,38 @@ public class Interpreter {
                     }
                 }
                 case "LOAD" -> {
-                    String var = stack.pop();
-                    StringValue val = context.get(var).asString();
+                    String var = getAsVar(stack.pop());
+                    Value<?> val = context.get(var);
                     stack.push(val.toString());
                 }
-                case "ADD" -> {
+                case "ADD", "SUB", "MUL", "DIV", "MOD", "EQ", "NEQ", "GT", "GTE", "LT", "LTE" -> {
                     Value<?> val1 = argumentToValue(stack.pop());
                     Value<?> val2 = argumentToValue(stack.pop());
-                    Value<?> result = Operation.binaryImplementation.get(Operation.Binary.ADD).get(val1.getType()).apply(val1, val2);
+                    Value<?> result = Operation.binaryImplementation
+                            .get(Operation.Binary.valueOf(command.operation()))
+                            .get(val1.getType()).apply(val1, val2);
                     stack.push(result.toString());
+                }
+                case "NEG", "NOT" -> {
+                    Value<?> val = argumentToValue(stack.pop());
+                    Value<?> result = Operation.unaryImplementation
+                            .get(Operation.Unary.valueOf(command.operation()))
+                            .get(val.getType()).apply(val);
+                    stack.push(result.toString());
+                }
+                case "JMF", "JMT" -> {
+                    Value<?> val = argumentToValue(stack.pop());
+                    if (val.getType() != ValueType.BOOL) {
+                        throw new RuntimeException("Illegal value '" + val + "'");
+                    }
+                    boolean jump = command.operation().equals("JMT") ? val.asBool().getValue() : !val.asBool().getValue();
+                    if (jump) {
+                        ip = labels.get(command.argument());
+                    }
+                }
+                case "JMP" -> ip = labels.get(command.argument());
+                case "HALT" -> {
+                    return;
                 }
             }
         }
@@ -148,6 +167,13 @@ public class Interpreter {
                 default -> throw new IllegalStateException("Unexpected value: " + marker);
             };
         }
+    }
+
+    private String getAsVar(String var) {
+        if (!(var.startsWith("\"") && var.endsWith("\""))) {
+            throw new RuntimeException("Illegal variable '" + var + "'");
+        }
+        return var.substring(1, var.length() - 1);
     }
 
     private static class LabelIsEmptyException extends RuntimeException {
