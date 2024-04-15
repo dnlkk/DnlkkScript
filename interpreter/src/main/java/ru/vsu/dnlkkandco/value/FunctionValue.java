@@ -2,9 +2,9 @@ package ru.vsu.dnlkkandco.value;
 
 import ru.vsu.dnlkkandco.ValueType;
 
-public class FunctionValue extends Value<String> {
-    public FunctionValue(String value) {
-        super(value);
+public class FunctionValue extends ReferenceValue<String> {
+    public FunctionValue(String ref, String value) {
+        super(ref, value);
     }
 
     public String getCodeBodyLabel() {

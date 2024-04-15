@@ -23,6 +23,11 @@ public class DoubleValue extends Value<Double> implements Comparable<DoubleValue
     }
 
     @Override
+    public StringValue asString() {
+        return new StringValue(getValue().toString());
+    }
+
+    @Override
     public int compareTo(DoubleValue o) {
         return getValue().compareTo(o.getValue());
     }

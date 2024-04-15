@@ -5,10 +5,10 @@ import ru.vsu.dnlkkandco.ValueType;
 import java.util.List;
 import java.util.Objects;
 
-public class ArrayValue extends Value<List<Value<?>>> {
+public class ArrayValue extends ReferenceValue<List<Value<?>>> {
 
-    public ArrayValue(List<Value<?>> value) {
-        super(value);
+    public ArrayValue(String ref, List<Value<?>> value) {
+        super(ref, value);
     }
 
     @Override

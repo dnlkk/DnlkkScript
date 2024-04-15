@@ -36,4 +36,9 @@ public class StringValue extends Value<String> implements Comparable<StringValue
     public int compareTo(StringValue o) {
         return getValue().compareTo(o.getValue());
     }
+
+    @Override
+    public String toString() {
+        return getValue();
+    }
 }

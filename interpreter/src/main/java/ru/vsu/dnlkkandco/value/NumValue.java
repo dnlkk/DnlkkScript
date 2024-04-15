@@ -23,6 +23,11 @@ public class NumValue extends Value<Integer> implements Comparable<NumValue> {
     }
 
     @Override
+    public StringValue asString() {
+        return new StringValue(getValue().toString());
+    }
+
+    @Override
     public int compareTo(NumValue o) {
         return getValue().compareTo(o.getValue());
     }

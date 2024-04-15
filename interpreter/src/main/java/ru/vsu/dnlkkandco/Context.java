@@ -1,5 +1,6 @@
 package ru.vsu.dnlkkandco;
 
+import ru.vsu.dnlkkandco.value.ReferenceValue;
 import ru.vsu.dnlkkandco.value.Value;
 
 import java.util.HashMap;
@@ -10,10 +11,12 @@ import java.util.NoSuchElementException;
 public class Context implements Iterable<Context> {
     private final Context parent;
     private final Map<String, Value<?>> variables;
+    private final Map<String, ReferenceValue<?>> references;
 
     public Context(Context parent) {
         this.parent = parent;
         this.variables = new HashMap<>();
+        this.references = new HashMap<>();
     }
 
     public boolean containsVariable(String key) {
@@ -29,8 +32,12 @@ public class Context implements Iterable<Context> {
         throw new NoSuchElementException("No such variable: " + varName);
     }
 
-    public Value<?> put(String key, Value<?> value) {
-        return variables.put(key, value);
+    public void setVariable(String key, Value<?> value) {
+        variables.put(key, value);
+    }
+
+    public void setReference(String key, ReferenceValue<?> value) {
+        references.put(key, value);
     }
 
     @Override

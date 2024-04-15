@@ -18,6 +18,11 @@ public class BoolValue extends Value<Boolean> {
     }
 
     @Override
+    public StringValue asString() {
+        return new StringValue(getValue().toString());
+    }
+
+    @Override
     public int hashCode() {
         return super.hashCode();
     }
