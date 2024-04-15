@@ -1,0 +1,30 @@
+#main
+    push "b"
+    push "a"
+    push N2
+    push #foo
+    push @fooFunc
+    newfunc
+
+    push @fooFunc
+    push "bar"
+    set
+
+    push N3
+    push N2
+    push N2
+    push "bar"
+    load
+    callfunc
+
+    push N2
+    MUL
+    halt
+
+#foo
+    push "b"
+    load
+    push "a"
+    load
+    add
+    return

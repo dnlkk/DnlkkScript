@@ -40,7 +40,7 @@ public class Operation {
 
         Map<ValueType, BinaryOperation> mul = new HashMap<>();
         mul.put(ValueType.NUM, (v1, v2) -> new NumValue(v1.asNum().getValue() * v2.asNum().getValue()));
-        mul.put(ValueType.DOUBLE, (v1, v2) -> new DoubleValue(v1.asDouble().getValue() / v2.asDouble().getValue()));
+        mul.put(ValueType.DOUBLE, (v1, v2) -> new DoubleValue(v1.asDouble().getValue() * v2.asDouble().getValue()));
         binaryImplementation.put(Binary.MUL, mul);
 
         Map<ValueType, BinaryOperation> div = new HashMap<>();

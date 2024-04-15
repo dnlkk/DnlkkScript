@@ -52,7 +52,7 @@ public class Interpreter {
         int ip = labels.get("main");
 
 
-        while (ip < commands.size()) {
+        while (ip != -1 && ip < commands.size()) {
             InterpreterCommand command = commands.get(ip++);
             try {
                 switch (command.operation()) {
@@ -149,7 +149,7 @@ public class Interpreter {
                         int argc = argumentToValue(stack.pop()).asNum().getValue();
                         String[] args = new String[argc];
                         IntStream.range(0, argc)
-                                .forEach(i -> args[i] = stack.pop());
+                                .forEach(i -> args[i] = argumentToValue(stack.pop()).asString().getValue());
                         FunctionValue function = new FunctionValue(ref, label, args);
                         context.setReference(ref, function);
                     }
@@ -160,7 +160,7 @@ public class Interpreter {
                         IntStream.range(0, argc)
                                 .forEach(i -> args[i] = argumentToValue(stack.pop()));
 
-                        FunctionValue function = context.get(ref).asFunction();
+                        FunctionValue function = context.getReference(ref).asFunction();
                         Context funcContext = new Context(context);
                         for (int i = 0; i < function.getArgs().length; i++) {
                             if (i >= argc) {
@@ -176,10 +176,10 @@ public class Interpreter {
                     }
                     case "RETURN" -> {
                         context = context.getParent();
-                        ip = ipStack.pop() + 1;
+                        ip = ipStack.pop();
                     }
                     case "HALT" -> {
-                        return;
+                        ip = -1;
                     }
                 }
             } catch (Exception e) {
