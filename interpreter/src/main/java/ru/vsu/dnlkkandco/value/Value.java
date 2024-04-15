@@ -15,6 +15,7 @@ public abstract class Value<T> {
 
     public abstract ValueType getType();
 
+
     public NumValue asNum() {throw new UnsupportedOperationException("Cannot convert to NumValue");}
     public DoubleValue asDouble() {throw new UnsupportedOperationException("Cannot convert to DoubleValue");}
     public BoolValue asBool() {throw new UnsupportedOperationException("Cannot convert to BoolValue");}

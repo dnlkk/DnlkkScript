@@ -31,5 +31,10 @@ public class DoubleValue extends Value<Double> implements Comparable<DoubleValue
     public int compareTo(DoubleValue o) {
         return getValue().compareTo(o.getValue());
     }
+
+    @Override
+    public String toString() {
+        return "D" + getValue().toString();
+    }
 }
 

@@ -34,4 +34,9 @@ public class BoolValue extends Value<Boolean> {
         if (!(obj instanceof BoolValue)) return false;
         return getValue().equals(((BoolValue) obj).getValue());
     }
+
+    @Override
+    public String toString() {
+        return "B" + getValue().toString();
+    }
 }

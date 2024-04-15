@@ -16,4 +16,9 @@ public abstract class ReferenceValue<T> extends Value<T> {
     public StringValue asString() {
         return new StringValue(getRef());
     }
+
+    @Override
+    public String toString() {
+        return "@" + getRef();
+    }
 }

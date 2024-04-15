@@ -31,5 +31,10 @@ public class NumValue extends Value<Integer> implements Comparable<NumValue> {
     public int compareTo(NumValue o) {
         return getValue().compareTo(o.getValue());
     }
+
+    @Override
+    public String toString() {
+        return "N" + getValue().toString();
+    }
 }
 

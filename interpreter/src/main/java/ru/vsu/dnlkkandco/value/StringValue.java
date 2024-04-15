@@ -39,6 +39,6 @@ public class StringValue extends Value<String> implements Comparable<StringValue
 
     @Override
     public String toString() {
-        return getValue();
+        return "\"" + getValue() + "\"";
     }
 }

@@ -3,10 +3,7 @@ package ru.vsu.dnlkkandco;
 import ru.vsu.dnlkkandco.value.ReferenceValue;
 import ru.vsu.dnlkkandco.value.Value;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class Context implements Iterable<Context> {
     private final Context parent;
@@ -38,6 +35,11 @@ public class Context implements Iterable<Context> {
 
     public void setReference(String key, ReferenceValue<?> value) {
         references.put(key, value);
+    }
+
+    public Value<?> getReference(String refName) {
+        Optional<Value<?>> value = Optional.ofNullable(references.get(refName));
+        return value.orElseThrow(() -> new NoSuchElementException("No such reference: " + refName));
     }
 
     @Override
