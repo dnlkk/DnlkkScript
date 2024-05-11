@@ -10,6 +10,14 @@ public class ObjectValue extends Value<Map<String, Value<?>>> {
         super(value);
     }
 
+    public Value<?> put(String fieldName, Value<?> value) {
+        return getValue().put(fieldName, value);
+    }
+
+    public Value<?> get(String fieldName) {
+        return getValue().getOrDefault(fieldName, new UndefinedValue());
+    }
+
     @Override
     public ValueType getType() {
         return ValueType.OBJECT;

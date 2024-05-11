@@ -97,38 +97,24 @@ public class Interpreter {
                         ArrayValue array = stack.pop().asArray();
                         int index = stack.pop().asNum().getValue();
                         Value<?> value = stack.pop();
-
-                        while (array.getValue().size() <= index) {
-                            array.getValue().add(new UndefinedValue());
-                        }
-                        array.getValue().set(index, value);
+                        array.set(index, value);
                     }
                     case CommandType.ALOAD -> {
                         ArrayValue array = stack.pop().asArray();
                         int index = stack.pop().asNum().getValue();
-
-                        if (array.getValue().size() <= index) {
-                            stack.push(new UndefinedValue());
-                        } else {
-                            stack.push(array.getValue().get(index));
-                        }
+                        stack.push(array.get(index));
                     }
                     case CommandType.NEWOBJECT -> stack.push(new ObjectValue(new HashMap<>()));
                     case CommandType.SETFIELD -> {
                         ObjectValue object = stack.pop().asObject();
                         String fieldName = stack.pop().asString().getValue();
                         Value<?> value = stack.pop();
-                        object.getValue().put(fieldName, value);
+                        object.put(fieldName, value);
                     }
                     case CommandType.GETFIELD -> {
                         ObjectValue object = stack.pop().asObject();
                         String fieldName = stack.pop().asString().getValue();
-
-                        if (object.getValue().containsKey(fieldName)) {
-                            stack.push(object.getValue().get(fieldName));
-                        } else {
-                            stack.push(new UndefinedValue());
-                        }
+                        stack.push(object.get(fieldName));
                     }
                     case CommandType.NEWFUNC -> {
                         String label = stack.pop().asString().getValue();
@@ -149,11 +135,8 @@ public class Interpreter {
 
                         Context funcContext = new Context(context);
                         for (int i = 0; i < function.getArgs().length; i++) {
-                            if (i >= argc) {
-                                funcContext.setVariable(function.getArgs()[i], new UndefinedValue());
-                            } else {
-                                funcContext.setVariable(function.getArgs()[i], args[i]);
-                            }
+                            Value<?> value = i >= argc ? new UndefinedValue() : args[i];
+                            funcContext.setVariable(function.getArgs()[i], value);
                         }
                         ipStack.push(ip);
 

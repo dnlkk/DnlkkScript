@@ -11,6 +11,17 @@ public class ArrayValue extends Value<List<Value<?>>> {
         super(value);
     }
 
+    public Value<?> get(int index) {
+        return getValue().size() <= index ? new UndefinedValue() : getValue().get(index);
+    }
+
+    public Value<?> set(int index, Value<?> value) {
+        while (getValue().size() <= index) {
+            getValue().add(new UndefinedValue());
+        }
+        return getValue().set(index, value);
+    }
+
     @Override
     public ValueType getType() {
         return ValueType.ARRAY;
