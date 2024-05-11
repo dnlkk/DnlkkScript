@@ -17,7 +17,6 @@ public class Interpreter {
     }
 
     private static final String LABEL_MARKER = "#";
-    private static final String REFERENCE_MARKER = "@";
     private static final String NULL_MARKER = "!";
     private static final String UNDEFINED_MARKER = "$";
     private static final String NUM_MARKER = "N";
@@ -87,15 +86,13 @@ public class Interpreter {
                         if (val.getType() != ValueType.BOOL) {
                             throw new RuntimeException("Illegal value '" + val + "'");
                         }
-                        boolean jump = command.command().equals(CommandType.JMT) ? val.asBool().getValue() : !val.asBool().getValue();
+                        boolean jump = command.command().equals(CommandType.JMT) == val.asBool().getValue();
                         if (jump) {
-                            ip = labels.get(command.argument());
+                            ip = labels.get(getAsLabel(command.argument().asString().getValue()));
                         }
                     }
-                    case CommandType.JMP -> ip = labels.get(command.argument());
-                    case CommandType.NEWARRAY -> {
-                        stack.push(new ArrayValue("", new ArrayList<>()));
-                    }
+                    case CommandType.JMP -> ip = labels.get(getAsLabel(command.argument().asString().getValue()));
+                    case CommandType.NEWARRAY -> stack.push(new ArrayValue(new ArrayList<>()));
                     case CommandType.ASET -> {
                         ArrayValue array = stack.pop().asArray();
                         int index = stack.pop().asNum().getValue();
@@ -116,9 +113,7 @@ public class Interpreter {
                             stack.push(array.getValue().get(index));
                         }
                     }
-                    case CommandType.NEWOBJECT -> {
-                        stack.push(new ObjectValue("", new HashMap<>()));
-                    }
+                    case CommandType.NEWOBJECT -> stack.push(new ObjectValue(new HashMap<>()));
                     case CommandType.SETFIELD -> {
                         ObjectValue object = stack.pop().asObject();
                         String fieldName = stack.pop().asString().getValue();
@@ -136,18 +131,16 @@ public class Interpreter {
                         }
                     }
                     case CommandType.NEWFUNC -> {
-//                        String ref = getAsRef(stack.pop());
                         String label = stack.pop().asString().getValue();
 
                         int argc = stack.pop().asNum().getValue();
                         String[] args = new String[argc];
                         IntStream.range(0, argc)
                                 .forEach(i -> args[i] = stack.pop().asString().getValue());
-                        FunctionValue function = new FunctionValue("", label, args);
+                        FunctionValue function = new FunctionValue(label, args);
                         stack.push(function);
                     }
                     case CommandType.CALLFUNC -> {
-//                        String ref = getAsRef(stack.pop());
                         FunctionValue function = stack.pop().asFunction();
                         int argc = stack.pop().asNum().getValue();
                         Value<?>[] args = new Value<?>[argc];
@@ -171,9 +164,7 @@ public class Interpreter {
                         context = context.getParent();
                         ip = ipStack.pop();
                     }
-                    case CommandType.HALT -> {
-                        ip = -1;
-                    }
+                    case CommandType.HALT -> ip = -1;
                 }
             } catch (Exception e) {
                 System.err.println("Error on line: " + command.lineNumber());
@@ -247,7 +238,6 @@ public class Interpreter {
             argument = argument.substring(1);
 
             return switch (marker) {
-                case REFERENCE_MARKER -> context.getReference(argument);
                 case NULL_MARKER -> new NullValue();
                 case UNDEFINED_MARKER -> new UndefinedValue();
                 case NUM_MARKER -> new NumValue(Integer.parseInt(argument));
@@ -257,20 +247,6 @@ public class Interpreter {
                 default -> throw new IllegalStateException("Unexpected value: " + marker);
             };
         }
-    }
-
-    private String getAsVar(String var) {
-        if (!(var.startsWith("\"") && var.endsWith("\""))) {
-            throw new RuntimeException("Illegal variable '" + var + "'");
-        }
-        return var.substring(1, var.length() - 1);
-    }
-
-    private String getAsRef(String ref) {
-        if (!ref.startsWith(REFERENCE_MARKER)) {
-            throw new RuntimeException("Invalid reference: " + ref);
-        }
-        return ref.substring(1);
     }
 
     private static class LabelIsEmptyException extends RuntimeException {

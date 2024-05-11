@@ -5,9 +5,9 @@ import ru.vsu.dnlkkandco.ValueType;
 import java.util.Map;
 import java.util.Objects;
 
-public class ObjectValue extends ReferenceValue<Map<String, Value<?>>> {
-    public ObjectValue(String ref, Map<String, Value<?>> value) {
-        super(ref, value);
+public class ObjectValue extends Value<Map<String, Value<?>>> {
+    public ObjectValue(Map<String, Value<?>> value) {
+        super(value);
     }
 
     @Override

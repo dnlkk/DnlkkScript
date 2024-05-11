@@ -2,10 +2,10 @@ package ru.vsu.dnlkkandco.value;
 
 import ru.vsu.dnlkkandco.ValueType;
 
-public class FunctionValue extends ReferenceValue<String> {
+public class FunctionValue extends Value<String> {
     private String[] args;
-    public FunctionValue(String ref, String value, String ... args) {
-        super(ref, value);
+    public FunctionValue(String value, String ... args) {
+        super(value);
         this.args = args;
     }
 

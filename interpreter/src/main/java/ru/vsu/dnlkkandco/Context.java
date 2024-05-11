@@ -1,6 +1,5 @@
 package ru.vsu.dnlkkandco;
 
-import ru.vsu.dnlkkandco.value.ReferenceValue;
 import ru.vsu.dnlkkandco.value.Value;
 
 import java.util.*;
@@ -8,12 +7,10 @@ import java.util.*;
 public class Context implements Iterable<Context> {
     private final Context parent;
     private final Map<String, Value<?>> variables;
-    private final Map<String, ReferenceValue<?>> references;
 
     public Context(Context parent) {
         this.parent = parent;
         this.variables = new HashMap<>();
-        this.references = new HashMap<>();
     }
 
     public boolean containsVariable(String key) {
@@ -31,23 +28,6 @@ public class Context implements Iterable<Context> {
 
     public void setVariable(String key, Value<?> value) {
         variables.put(key, value);
-    }
-
-    public void setReference(String key, ReferenceValue<?> value) {
-        references.put(key, value);
-    }
-
-    public boolean containsReference(String key) {
-        return references.containsKey(key);
-    }
-
-    public Value<?> getReference(String refName) {
-        for (var context : this) {
-            if (context.containsReference(refName)) {
-                return context.references.get(refName);
-            }
-        }
-        throw new NoSuchElementException("No such variable: " + refName);
     }
 
     public Context getParent() {
