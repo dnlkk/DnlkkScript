@@ -1,3 +1,3 @@
 package ru.vsu.dnlkkandco;
 
-public record InterpreterCommand(String operation, String argument, int lineNumber) {}
+public record InterpreterCommand(CommandType command, String argument, int lineNumber) {}

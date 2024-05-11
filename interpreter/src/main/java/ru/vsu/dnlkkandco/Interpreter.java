@@ -1,6 +1,5 @@
 package ru.vsu.dnlkkandco;
 
-import com.sun.jdi.IntegerValue;
 import ru.vsu.dnlkkandco.value.*;
 
 import java.io.BufferedReader;
@@ -55,52 +54,52 @@ public class Interpreter {
         while (ip != -1 && ip < commands.size()) {
             InterpreterCommand command = commands.get(ip++);
             try {
-                switch (command.operation()) {
-                    case "POP" -> stack.pop();
-                    case "PUSH" -> stack.push(command.argument());
-                    case "SET" -> {
+                switch (command.command()) {
+                    case CommandType.POP -> stack.pop();
+                    case CommandType.PUSH -> stack.push(command.argument());
+                    case CommandType.SET -> {
                         String var = getAsVar(stack.pop());
                         String argument = stack.pop();
                         context.setVariable(var, argumentToValue(argument));
                     }
-                    case "LOAD" -> {
+                    case CommandType.LOAD -> {
                         String var = getAsVar(stack.pop());
                         Value<?> val = context.get(var);
                         stack.push(val.toString());
                     }
-                    case "ADD", "SUB", "MUL", "DIV", "MOD", "EQ", "NEQ", "GT", "GTE", "LT", "LTE" -> {
+                    case CommandType.ADD, CommandType.SUB, CommandType.MUL, CommandType.DIV, CommandType.MOD, CommandType.EQ, CommandType.NEQ, CommandType.GT, CommandType.GTE, CommandType.LT, CommandType.LTE -> {
                         Value<?> val1 = argumentToValue(stack.pop());
                         Value<?> val2 = argumentToValue(stack.pop());
                         Value<?> result = Operation.binaryImplementation
-                                .get(Operation.Binary.valueOf(command.operation()))
+                                .get(Operation.Binary.valueOf(command.command().toString()))
                                 .get(val1.getType()).apply(val1, val2);
                         stack.push(result.toString());
                     }
-                    case "NEG", "NOT" -> {
+                    case CommandType.NEG, CommandType.NOT -> {
                         Value<?> val = argumentToValue(stack.pop());
                         Value<?> result = Operation.unaryImplementation
-                                .get(Operation.Unary.valueOf(command.operation()))
+                                .get(Operation.Unary.valueOf(command.command().toString()))
                                 .get(val.getType()).apply(val);
                         stack.push(result.toString());
                     }
-                    case "JMF", "JMT" -> {
+                    case CommandType.JMF, CommandType.JMT -> {
                         Value<?> val = argumentToValue(stack.pop());
                         if (val.getType() != ValueType.BOOL) {
                             throw new RuntimeException("Illegal value '" + val + "'");
                         }
-                        boolean jump = command.operation().equals("JMT") ? val.asBool().getValue() : !val.asBool().getValue();
+                        boolean jump = command.command().equals(CommandType.JMT) ? val.asBool().getValue() : !val.asBool().getValue();
                         if (jump) {
                             ip = labels.get(command.argument());
                         }
                     }
-                    case "JMP" -> ip = labels.get(command.argument());
-                    case "NEWARRAY" -> {
+                    case CommandType.JMP -> ip = labels.get(command.argument());
+                    case CommandType.NEWARRAY -> {
                         String ref = getAsRef(stack.pop());
                         if (!context.containsVariable(ref)) {
                             context.setReference(ref, new ArrayValue(ref, new ArrayList<>()));
                         }
                     }
-                    case "ASET" -> {
+                    case CommandType.ASET -> {
                         ArrayValue array = argumentToValue(stack.pop()).asArray();
                         int index = argumentToValue(stack.pop()).asNum().getValue();
                         Value<?> value = argumentToValue(stack.pop());
@@ -110,7 +109,7 @@ public class Interpreter {
                         }
                         array.getValue().set(index, value);
                     }
-                    case "ALOAD" -> {
+                    case CommandType.ALOAD -> {
                         ArrayValue array = argumentToValue(stack.pop()).asArray();
                         int index = argumentToValue(stack.pop()).asNum().getValue();
 
@@ -120,19 +119,19 @@ public class Interpreter {
                             stack.push(array.getValue().get(index).toString());
                         }
                     }
-                    case "NEWOBJECT" -> {
+                    case CommandType.NEWOBJECT -> {
                         String ref = getAsRef(stack.pop());
                         if (!context.containsVariable(ref)) {
                             context.setReference(ref, new ObjectValue(ref, new HashMap<>()));
                         }
                     }
-                    case "SETFIELD" -> {
+                    case CommandType.SETFIELD -> {
                         ObjectValue object = argumentToValue(stack.pop()).asObject();
                         String fieldName = argumentToValue(stack.pop()).asString().getValue();
                         Value<?> value = argumentToValue(stack.pop());
                         object.getValue().put(fieldName, value);
                     }
-                    case "GETFIELD" -> {
+                    case CommandType.GETFIELD -> {
                         ObjectValue object = argumentToValue(stack.pop()).asObject();
                         String fieldName = argumentToValue(stack.pop()).asString().getValue();
 
@@ -142,7 +141,7 @@ public class Interpreter {
                             stack.push(new UndefinedValue().toString());
                         }
                     }
-                    case "NEWFUNC" -> {
+                    case CommandType.NEWFUNC -> {
                         String ref = getAsRef(stack.pop());
                         String label = getAsLabel(stack.pop());
 
@@ -153,7 +152,7 @@ public class Interpreter {
                         FunctionValue function = new FunctionValue(ref, label, args);
                         context.setReference(ref, function);
                     }
-                    case "CALLFUNC" -> {
+                    case CommandType.CALLFUNC -> {
                         String ref = getAsRef(stack.pop());
                         int argc = argumentToValue(stack.pop()).asNum().getValue();
                         Value<?>[] args = new Value<?>[argc];
@@ -174,11 +173,11 @@ public class Interpreter {
                         context = funcContext;
                         ip = labels.get(function.getCodeBodyLabel());
                     }
-                    case "RETURN" -> {
+                    case CommandType.RETURN -> {
                         context = context.getParent();
                         ip = ipStack.pop();
                     }
-                    case "HALT" -> {
+                    case CommandType.HALT -> {
                         ip = -1;
                     }
                 }
@@ -228,11 +227,11 @@ public class Interpreter {
                 } else {
                     int delimiterIndex = line.indexOf(" ");
                     if (delimiterIndex == -1) {
-                        commands.add(new InterpreterCommand(line.toUpperCase(), null, lineNumber));
+                        commands.add(new InterpreterCommand(CommandType.valueOf(line.toUpperCase()), null, lineNumber));
                     } else {
                         String operation = line.substring(0, delimiterIndex);
                         String argument = line.substring(delimiterIndex + 1);
-                        commands.add(new InterpreterCommand(operation.toUpperCase(), argument, lineNumber));
+                        commands.add(new InterpreterCommand(CommandType.valueOf(operation.toUpperCase()), argument, lineNumber));
                     }
                 }
             }
