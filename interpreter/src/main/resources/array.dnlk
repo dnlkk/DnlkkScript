@@ -1,7 +1,5 @@
 #main
-    push @array
-    NEWARRAY
-    push @array
+    newarray
     push "array"
     set
     push "hello"

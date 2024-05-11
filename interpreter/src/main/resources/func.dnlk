@@ -2,11 +2,9 @@
     push "b"
     push "a"
     push N2
-    push #foo
-    push @fooFunc
+    push "#foo"
     newfunc
 
-    push @fooFunc
     push "bar"
     set
 

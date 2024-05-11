@@ -1,3 +1,5 @@
 package ru.vsu.dnlkkandco;
 
-public record InterpreterCommand(CommandType command, String argument, int lineNumber) {}
+import ru.vsu.dnlkkandco.value.Value;
+
+public record InterpreterCommand(CommandType command, Value<?> argument, int lineNumber) {}

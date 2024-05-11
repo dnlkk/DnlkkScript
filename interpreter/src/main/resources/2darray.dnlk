@@ -1,15 +1,9 @@
 #main
-    push @inner
     newarray
-
-    push @outter
-    newarray
-
-    push @outter
     push "array"
     set
 
-    push @inner
+    newarray
     push N0
     push "array"
     load
