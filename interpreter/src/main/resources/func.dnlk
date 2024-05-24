@@ -5,9 +5,9 @@
     push "bar"
     set
 
+    newarray
+    dup
     push N3
-    push N2
-    push "bar"
     load
     callfunc
 

@@ -8,5 +8,5 @@ public enum CommandType {
     NEWARRAY, ASET, ALOAD,
     NEWOBJECT, SETFIELD, GETFIELD,
     NEWFUNC, CALLFUNC, RETURN,
-    HALT
+    DUP, HALT
 }

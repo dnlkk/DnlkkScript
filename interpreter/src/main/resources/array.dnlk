@@ -2,14 +2,18 @@
     newarray
     push "array"
     set
-    push "hello"
-    push N0
+
     push "array"
     load
+    push N0
+    push "hello"
     aset
+
     push " world"
+
     push N0
     push "array"
     load
     aload
+
     add

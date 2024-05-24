@@ -55,6 +55,7 @@ public class Interpreter {
                 switch (command.command()) {
                     case CommandType.POP -> stack.pop();
                     case CommandType.PUSH -> stack.push(command.argument());
+                    case CommandType.DUP -> stack.push(stack.peek());
                     case CommandType.SET -> {
                         StringValue var = stack.pop().asString();
                         Value<?> argument = stack.pop();
@@ -93,9 +94,9 @@ public class Interpreter {
                     case CommandType.JMP -> ip = labels.get(getAsLabel(command.argument().asString().getValue()));
                     case CommandType.NEWARRAY -> stack.push(new ArrayValue(new ArrayList<>()));
                     case CommandType.ASET -> {
-                        ArrayValue array = stack.pop().asArray();
-                        int index = stack.pop().asNum().getValue();
                         Value<?> value = stack.pop();
+                        int index = stack.pop().asNum().getValue();
+                        ArrayValue array = stack.pop().asArray();
                         array.set(index, value);
                     }
                     case CommandType.ALOAD -> {
