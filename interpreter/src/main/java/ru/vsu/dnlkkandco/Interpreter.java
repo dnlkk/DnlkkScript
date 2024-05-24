@@ -73,7 +73,9 @@ public class Interpreter {
                         Value<?> val = context.get(var.getValue());
                         stack.push(val);
                     }
-                    case CommandType.ADD, CommandType.SUB, CommandType.MUL, CommandType.DIV, CommandType.MOD, CommandType.EQ, CommandType.NEQ, CommandType.GT, CommandType.GTE, CommandType.LT, CommandType.LTE -> {
+                    case CommandType.ADD, CommandType.SUB, CommandType.MUL, CommandType.DIV, CommandType.MOD,
+                         CommandType.EQ, CommandType.NEQ, CommandType.GT, CommandType.GTE, CommandType.LT,
+                         CommandType.LTE -> {
                         Value<?> val1 = stack.pop();
                         Value<?> val2 = stack.pop();
                         Value<?> result = Operation.binaryImplementation
@@ -168,10 +170,54 @@ public class Interpreter {
                     var value = new StringValue(STDIN.nextLine());
                     stack.push(value);
                 }),
-                "out", new SysCall((args, stack) -> {
+                "out", new SysCall((args, _) -> {
                     STDOUT.println(args.getValue().stream().map(Value::getValue).map(Object::toString).collect(Collectors.joining(" ")));
-                })
-        )));
+                }))
+        ));
+        context.setVariable("len", new SysCall((args, stack) -> {
+            var length = args.get(0).asArray().getValue().size();
+            var lengthVal = new NumValue(length);
+            stack.push(lengthVal);
+        }));
+        context.setVariable("math", new ObjectValue(Map.of(
+                "abs", new SysCall((args, stack) -> {
+                    var value = Math.abs(args.get(0).asDouble().getValue());
+                    stack.push(new DoubleValue(value));
+                }),
+                "sqrt", new SysCall((args, stack) -> {
+                    var value = Math.sqrt(args.get(0).asDouble().getValue());
+                    stack.push(new DoubleValue(value));
+                }),
+                "pow", new SysCall((args, stack) -> {
+                    var value = Math.pow(args.get(0).asDouble().getValue(), args.get(1).asDouble().getValue());
+                    stack.push(new DoubleValue(value));
+                }),
+                "sin", new SysCall((args, stack) -> {
+                    var value = Math.sin(args.get(0).asDouble().getValue());
+                    stack.push(new DoubleValue(value));
+                }),
+                "cos", new SysCall((args, stack) -> {
+                    var value = Math.cos(args.get(0).asDouble().getValue());
+                    stack.push(new DoubleValue(value));
+                }),
+                "tan", new SysCall((args, stack) -> {
+                    var value = Math.tan(args.get(0).asDouble().getValue());
+                    stack.push(new DoubleValue(value));
+                }),
+                "antan", new SysCall((args, stack) -> {
+                    var value = Math.atan(args.get(0).asDouble().getValue());
+                    stack.push(new DoubleValue(value));
+                }),
+                "PI", new DoubleValue(Math.PI),
+                "E", new DoubleValue(Math.E)
+        )
+        ));
+        context.setVariable("credentials", new SysCall((_, _) -> {
+            System.out.println("=== Авторы сего недоразумения! ===");
+            System.out.println("Человек, который решил что знает ассемблер: Путин Павел");
+            System.out.println("Frontender, нашедший способ писать на js даже компиляторы: Шлыков Данила");
+            System.out.println("Кодогенератор во плоти, пожалуйста: Евгений Саков");
+        }));
     }
 
     private String getAsLabel(String label) {
@@ -237,8 +283,7 @@ public class Interpreter {
                 case NULL_MARKER -> new NullValue();
                 case UNDEFINED_MARKER -> new UndefinedValue();
                 case NUM_MARKER -> new NumValue(Integer.parseInt(argument));
-                case DOUBLE_MARKER ->
-                        new DoubleValue(Double.parseDouble(argument));
+                case DOUBLE_MARKER -> new DoubleValue(Double.parseDouble(argument));
                 case BOOL_MARKER -> new BoolValue(Boolean.parseBoolean(argument));
                 default -> throw new IllegalStateException("Unexpected value: " + marker);
             };
@@ -246,14 +291,20 @@ public class Interpreter {
     }
 
     private static class LabelIsEmptyException extends RuntimeException {
-        public LabelIsEmptyException(String label) {super(label);}
+        public LabelIsEmptyException(String label) {
+            super(label);
+        }
     }
 
     private static class DuplicateLabelException extends RuntimeException {
-        public DuplicateLabelException(String label) {super(label);}
+        public DuplicateLabelException(String label) {
+            super(label);
+        }
     }
 
     private static class NoMainLabelException extends RuntimeException {
-        public NoMainLabelException(String label) {super(label);}
+        public NoMainLabelException(String label) {
+            super(label);
+        }
     }
 }
