@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class Interpreter {
     public static void main(String[] args) throws IOException {
@@ -118,30 +117,14 @@ public class Interpreter {
                     }
                     case CommandType.NEWFUNC -> {
                         String label = stack.pop().asString().getValue();
-
-                        int argc = stack.pop().asNum().getValue();
-                        String[] args = new String[argc];
-                        IntStream.range(0, argc)
-                                .forEach(i -> args[i] = stack.pop().asString().getValue());
-                        FunctionValue function = new FunctionValue(label, args);
+                        FunctionValue function = new FunctionValue(label);
                         stack.push(function);
                     }
                     case CommandType.CALLFUNC -> {
                         FunctionValue function = stack.pop().asFunction();
-                        int argc = stack.pop().asNum().getValue();
-                        Value<?>[] args = new Value<?>[argc];
-                        IntStream.range(0, argc)
-                                .forEach(i -> args[i] = stack.pop());
-
-                        Context funcContext = new Context(context);
-                        for (int i = 0; i < function.getArgs().length; i++) {
-                            Value<?> value = i >= argc ? new UndefinedValue() : args[i];
-                            funcContext.setVariable(function.getArgs()[i], value);
-                        }
                         ipStack.push(ip);
-
-                        context = funcContext;
-                        ip = labels.get(function.getCodeBodyLabel());
+                        context = new Context(context);
+                        ip = labels.get(getAsLabel(function.getCodeBodyLabel()));
                     }
                     case CommandType.RETURN -> {
                         context = context.getParent();

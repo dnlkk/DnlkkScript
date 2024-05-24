@@ -3,18 +3,13 @@ package ru.vsu.dnlkkandco.value;
 import ru.vsu.dnlkkandco.ValueType;
 
 public class FunctionValue extends Value<String> {
-    private String[] args;
-    public FunctionValue(String value, String ... args) {
+
+    public FunctionValue(String value) {
         super(value);
-        this.args = args;
     }
 
     public String getCodeBodyLabel() {
         return getValue();
-    }
-
-    public String[] getArgs() {
-        return args;
     }
 
     @Override
