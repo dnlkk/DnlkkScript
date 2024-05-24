@@ -7,7 +7,16 @@
 
     newarray
     dup
+    push N0
     push N3
+    aset
+
+    dup
+    push N1
+    push N2
+    aset
+
+    push "bar"
     load
     callfunc
 
@@ -16,10 +25,20 @@
     halt
 
 #foo
-    push "b"
-    set
+    push "__args__"
+    load
+    push N0
+    aload
     push "a"
     set
+
+    push "__args__"
+    load
+    push N1
+    aload
+    push "b"
+    set
+
     push "b"
     load
     push "a"

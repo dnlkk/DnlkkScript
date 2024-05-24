@@ -100,8 +100,8 @@ public class Interpreter {
                         array.set(index, value);
                     }
                     case CommandType.ALOAD -> {
-                        ArrayValue array = stack.pop().asArray();
                         int index = stack.pop().asNum().getValue();
+                        ArrayValue array = stack.pop().asArray();
                         stack.push(array.get(index));
                     }
                     case CommandType.NEWOBJECT -> stack.push(new ObjectValue(new HashMap<>()));
@@ -125,6 +125,8 @@ public class Interpreter {
                         FunctionValue function = stack.pop().asFunction();
                         ipStack.push(ip);
                         context = new Context(context);
+                        ArrayValue args = stack.pop().asArray();
+                        context.setVariable("__args__", args);
                         ip = labels.get(getAsLabel(function.getCodeBodyLabel()));
                     }
                     case CommandType.RETURN -> {
