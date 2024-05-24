@@ -115,9 +115,9 @@ public class Interpreter {
                     }
                     case CommandType.NEWOBJECT -> stack.push(new ObjectValue(new HashMap<>()));
                     case CommandType.SETFIELD -> {
-                        ObjectValue object = stack.pop().asObject();
-                        String fieldName = stack.pop().asString().getValue();
                         Value<?> value = stack.pop();
+                        String fieldName = stack.pop().asString().getValue();
+                        ObjectValue object = stack.pop().asObject();
                         object.put(fieldName, value);
                     }
                     case CommandType.GETFIELD -> {
