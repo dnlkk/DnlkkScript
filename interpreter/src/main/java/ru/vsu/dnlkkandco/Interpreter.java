@@ -5,8 +5,10 @@ import ru.vsu.dnlkkandco.value.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Interpreter {
     public static void main(String[] args) throws IOException {
@@ -21,6 +23,9 @@ public class Interpreter {
     private static final String NUM_MARKER = "N";
     private static final String DOUBLE_MARKER = "D";
     private static final String BOOL_MARKER = "B";
+
+    private static final Scanner STDIN = new Scanner(System.in);
+    private static final PrintStream STDOUT = System.out;
 
     private final Path source;
     private final Map<String, Integer> labels;
@@ -43,6 +48,8 @@ public class Interpreter {
             // добавить обработку исключений
             preprocess();
         }
+
+        initSycCalls();
 
         assert labels.containsKey("main");
         // processor register
@@ -112,8 +119,8 @@ public class Interpreter {
                         object.put(fieldName, value);
                     }
                     case CommandType.GETFIELD -> {
-                        ObjectValue object = stack.pop().asObject();
                         String fieldName = stack.pop().asString().getValue();
+                        ObjectValue object = stack.pop().asObject();
                         stack.push(object.get(fieldName));
                     }
                     case CommandType.NEWFUNC -> {
@@ -122,12 +129,20 @@ public class Interpreter {
                         stack.push(function);
                     }
                     case CommandType.CALLFUNC -> {
-                        FunctionValue function = stack.pop().asFunction();
-                        ipStack.push(ip);
+                        Value<?> callable = stack.pop();
                         context = new Context(context);
                         ArrayValue args = stack.pop().asArray();
-                        context.setVariable("__args__", args);
-                        ip = labels.get(getAsLabel(function.getCodeBodyLabel()));
+
+                        switch (callable) {
+                            case FunctionValue function -> {
+                                ipStack.push(ip);
+                                context.setVariable("__args__", args);
+                                ip = labels.get(getAsLabel(function.getCodeBodyLabel()));
+                            }
+                            case SysCall sysCall -> sysCall.getValue().accept(args, stack);
+                            default -> throw new RuntimeException("Illegal call '" + callable + "'");
+                        }
+
                     }
                     case CommandType.RETURN -> {
                         context = context.getParent();
@@ -144,7 +159,19 @@ public class Interpreter {
         }
 
         // todo: to remove
-        System.out.println(stack.peek());
+//        System.out.println(stack.peek());
+    }
+
+    private void initSycCalls() {
+        context.setVariable("iout", new ObjectValue(Map.of(
+                "in", new SysCall((_, stack) -> {
+                    var value = new StringValue(STDIN.nextLine());
+                    stack.push(value);
+                }),
+                "out", new SysCall((args, stack) -> {
+                    STDOUT.println(args.getValue().stream().map(Value::getValue).map(Object::toString).collect(Collectors.joining(" ")));
+                })
+        )));
     }
 
     private String getAsLabel(String label) {

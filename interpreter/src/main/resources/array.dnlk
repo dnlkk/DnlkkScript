@@ -11,9 +11,23 @@
 
     push " world"
 
-    push N0
     push "array"
     load
+    push N0
     aload
 
     add
+    push "result"
+    set
+
+    newarray
+    dup
+    push N0
+    push "result"
+    load
+    aset
+    push "iout"
+    load
+    push "out"
+    getfield
+    callfunc
