@@ -165,9 +165,10 @@ public class Interpreter {
     }
 
     private void initSycCalls() {
+        var sysCallDefinition = new SysCallsDefinition(STDIN, STDOUT);
         context.setVariable("iout", new ObjectValue(Map.of(
                 "in", new SysCall((_, stack) -> {
-                    var value = new StringValue(STDIN.nextLine());
+                    var value = new StringValue(sysCallDefinition.in());
                     stack.push(value);
                 }),
                 "out", new SysCall((args, _) -> {
