@@ -6,6 +6,9 @@ import ru.vsu.dnlkkandco.value.SysCall;
 import ru.vsu.dnlkkandco.value.Value;
 
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -23,12 +26,47 @@ public class SysCallsDefinition {
         return STDIN.nextLine();
     }
 
-    public void out(ArrayValue args) {
-        STDOUT.println(args.getValue()
-                .stream()
-                .map(Value::getValue)
-                .map(Object::toString)
-                .collect(Collectors.joining(" "))
-        );
+    public void out(String ... valuesToPrint) {
+        STDOUT.println(String.join(" ", valuesToPrint));
+    }
+
+    public int len(List<?> value) {
+        return value.size();
+    }
+
+    public int len(String value) {
+        return value.length();
+    }
+
+    public int len(Map<?, ?> value) {
+        return value.size();
+    }
+
+    public double abs(double value) {
+        return Math.abs(value);
+    }
+
+    public double sqrt(double value) {
+        return Math.sqrt(value);
+    }
+
+    public double pow(double base, double exponent) {
+        return Math.pow(base, exponent);
+    }
+
+    public double sin(double value) {
+        return Math.sin(value);
+    }
+
+    public double cos(double value) {
+        return Math.cos(value);
+    }
+
+    public double tan(double value) {
+        return Math.tan(value);
+    }
+
+    public double antan(double value) {
+        return Math.atan(value);
     }
 }

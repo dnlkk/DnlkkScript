@@ -165,49 +165,67 @@ public class Interpreter {
     }
 
     private void initSycCalls() {
-        var sysCallDefinition = new SysCallsDefinition(STDIN, STDOUT);
+        final var sysCallDefinition = new SysCallsDefinition(STDIN, STDOUT);
         context.setVariable("iout", new ObjectValue(Map.of(
                 "in", new SysCall((_, stack) -> {
                     var value = new StringValue(sysCallDefinition.in());
                     stack.push(value);
                 }),
                 "out", new SysCall((args, _) -> {
-                    STDOUT.println(args.getValue().stream().map(Value::getValue).map(Object::toString).collect(Collectors.joining(" ")));
+                    String[] values = args.asArray().getValue()
+                            .stream()
+                            .map(Value::getValue)
+                            .map(Object::toString)
+                            .toArray(String[]::new);
+                    sysCallDefinition.out(values);
                 }))
         ));
         context.setVariable("len", new SysCall((args, stack) -> {
-            var length = args.get(0).asArray().getValue().size();
-            var lengthVal = new NumValue(length);
-            stack.push(lengthVal);
+            Value<?> value = args.get(0);
+            int result = switch (value.getType()) {
+                case ValueType.ARRAY -> sysCallDefinition.len(value.asArray().getValue());
+                case ValueType.OBJECT -> sysCallDefinition.len(value.asObject().getValue());
+                case ValueType.STRING -> sysCallDefinition.len(value.asString().getValue());
+                default -> throw new RuntimeException("Illegal type '" + value.getType() + "'");
+            };
+            stack.push(new NumValue(result));
         }));
         context.setVariable("math", new ObjectValue(Map.of(
                 "abs", new SysCall((args, stack) -> {
-                    var value = Math.abs(args.get(0).asDouble().getValue());
-                    stack.push(new DoubleValue(value));
+                    double value = args.get(0).asDouble().getValue();
+                    var result = sysCallDefinition.abs(value);
+                    stack.push(new DoubleValue(result));
                 }),
                 "sqrt", new SysCall((args, stack) -> {
-                    var value = Math.sqrt(args.get(0).asDouble().getValue());
-                    stack.push(new DoubleValue(value));
+                    double value = args.get(0).asDouble().getValue();
+                    var result = sysCallDefinition.sqrt(value);
+                    stack.push(new DoubleValue(result));
                 }),
                 "pow", new SysCall((args, stack) -> {
-                    var value = Math.pow(args.get(0).asDouble().getValue(), args.get(1).asDouble().getValue());
+                    var base = args.get(0).asDouble().getValue();
+                    var exponent = args.get(1).asDouble().getValue();
+                    var value = sysCallDefinition.pow(base, exponent);
                     stack.push(new DoubleValue(value));
                 }),
                 "sin", new SysCall((args, stack) -> {
-                    var value = Math.sin(args.get(0).asDouble().getValue());
-                    stack.push(new DoubleValue(value));
+                    double value = args.get(0).asDouble().getValue();
+                    var result = sysCallDefinition.sin(value);
+                    stack.push(new DoubleValue(result));
                 }),
                 "cos", new SysCall((args, stack) -> {
-                    var value = Math.cos(args.get(0).asDouble().getValue());
-                    stack.push(new DoubleValue(value));
+                    double value = args.get(0).asDouble().getValue();
+                    var result = sysCallDefinition.cos(value);
+                    stack.push(new DoubleValue(result));
                 }),
                 "tan", new SysCall((args, stack) -> {
-                    var value = Math.tan(args.get(0).asDouble().getValue());
-                    stack.push(new DoubleValue(value));
+                    double value = args.get(0).asDouble().getValue();
+                    var result = sysCallDefinition.tan(value);
+                    stack.push(new DoubleValue(result));
                 }),
                 "antan", new SysCall((args, stack) -> {
-                    var value = Math.atan(args.get(0).asDouble().getValue());
-                    stack.push(new DoubleValue(value));
+                    double value = args.get(0).asDouble().getValue();
+                    var result = sysCallDefinition.antan(value);
+                    stack.push(new DoubleValue(result));
                 }),
                 "PI", new DoubleValue(Math.PI),
                 "E", new DoubleValue(Math.E)
