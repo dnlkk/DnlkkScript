@@ -1,0 +1,70 @@
+{
+    "name": "dnlkkscript-lsp",
+    "displayName": "DnlkkScript Language Server",
+    "version": "0.1.0",
+    "description": "Language Server for DnlkkScript",
+    "main": "out/client.js",
+    "engines": {
+        "vscode": "^1.60.0"
+    },
+    "categories": [
+        "Programming Languages",
+        "Syntax",
+        "Themes"
+    ],
+    "activationEvents": [
+        "onLanguage:dnlkkscript"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "dnlkkscript",
+                "extensions": [
+                    ".dnlk"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "commands": [
+          {
+            "command": "dnlkkscript.helloWorld",
+            "title": "Hello World"
+          }
+        ],
+        "grammars": [
+            {
+                "language": "dnlkkscript",
+                "scopeName": "source.dnlkkscript",
+                "path": "./syntaxes/dnlkkscript.tmLanguage.json"
+            }
+        ],
+        "themes": [
+            {
+                "label": "DnlkkScriptTheme",
+                "uiTheme": "vs-dark",
+                "path": "./theme/dnlkkscript-theme.json"
+            }
+        ],
+        "semanticTokens": {
+            "scopes": {
+                "functions": [
+                    "function"
+                ],
+                "variables": [
+                    "variable"
+                ]
+            }
+        }
+    },
+    "dependencies": {
+        "vscode-languageclient": "^9.0.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.12.8",
+        "@types/vscode": "^1.89.0",
+        "typescript": "^5.4.5"
+    },
+    "scripts": {
+		"compile": "tsc -b"
+    }
+}

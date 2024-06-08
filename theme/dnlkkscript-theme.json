@@ -1,0 +1,76 @@
+{
+    "name": "DnlkkScriptTheme",
+    "type": "dark",
+    "colors": {
+        "editor.background": "#1E1E1E",
+        "editor.foreground": "#D4D4D4"
+    },
+    "tokenColors": [
+        {
+            "scope": "keyword.control.dnlkkscript",
+            "settings": {
+                "foreground": "#FF00FF" 
+            }
+        },
+        {
+            "scope": "constant.language.dnlkkscript",
+            "settings": {
+                "foreground": "#FF4500" 
+            }
+        },
+        {
+            "scope": "keyword.operator.dnlkkscript",
+            "settings": {
+                "foreground": "#FFD700" 
+            }
+        },
+        {
+            "scope": "variable.other.dnlkkscript",
+            "settings": {
+                "foreground": "#00FF00" 
+            }
+        },
+        {
+            "scope": "constant.numeric.dnlkkscript",
+            "settings": {
+                "foreground": "#00BFFF" 
+            }
+        },
+        {
+            "scope": "string.quoted.double.dnlkkscript",
+            "settings": {
+                "foreground": "#FFA500" 
+            }
+        },
+        {
+            "scope": "comment.line.dnlkkscript",
+            "settings": {
+                "foreground": "#808080" 
+            }
+        },
+        {
+            "scope": "comment.block.dnlkkscript",
+            "settings": {
+                "foreground": "#808080" 
+            }
+        },
+        {
+            "scope": "meta.array.literal.dnlkkscript",
+            "settings": {
+                "foreground": "#ADD8E6" 
+            }
+        },
+        {
+            "scope": "meta.object.literal.dnlkkscript",
+            "settings": {
+                "foreground": "#90EE90" 
+            }
+        },
+        {
+            "scope": "variable.object.member.dnlkkscript",
+            "settings": {
+                "foreground": "#FFFF00" 
+            }
+        }
+    ]
+}
