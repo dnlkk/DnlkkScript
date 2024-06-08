@@ -6,156 +6,119 @@ import java.util.List;
 
 public class CodeGeneration {
 
+    private final StringBuilder output = new StringBuilder();
+
     public StringBuilder generate(AstNode node) {
-        if (node instanceof TerminalAstNode) {
-            return generate((TerminalAstNode) node);
-        } else if (node instanceof ProgramNode) {
-            return generate((ProgramNode) node);
-        } else if (node instanceof BlockNode) {
-            return generate((BlockNode) node);
-        } else if (node instanceof BinOpNode) {
-            return generate((BinOpNode) node);
-        } else if (node instanceof UnaryOpNode) {
-            return generate((UnaryOpNode) node);
-        } else if (node instanceof ObjectCallNode) {
-            return generate((ObjectCallNode) node);
-        } else if (node instanceof ArrayCallNode) {
-            return generate((ArrayCallNode) node);
-        } else if (node instanceof FunctionCallNode) {
-            return generate((FunctionCallNode) node);
-        } else if (node instanceof FunctionDefinitionNode) {
-            return generate((FunctionDefinitionNode) node);
-        } else if (node instanceof ObjectLiteralNode) {
-            return generate((ObjectLiteralNode) node);
-        } else if (node instanceof ArrayLiteralNode) {
-            return generate((ArrayLiteralNode) node);
-        } else if (node instanceof FieldNode) {
-            return generate((FieldNode) node);
-        } else if (node instanceof ReturnNode) {
-            return generate((ReturnNode) node);
-        } else if (node instanceof AssignNode) {
-            return generate((AssignNode) node);
-        } else if (node instanceof WhileNode) {
-            return generate((WhileNode) node);
-        } else if (node instanceof ElseNode) {
-            return generate((ElseNode) node);
-        } else if (node instanceof ElifNode) {
-            return generate((ElifNode) node);
-        } else if (node instanceof IfNode) {
-            return generate((IfNode) node);
-        } else if (node instanceof ForNode) {
-            return generate((ForNode) node);
-        }
-        return new StringBuilder();
+        return switch (node) {
+            case TerminalAstNode terminalAstNode -> generate(terminalAstNode);
+            case ProgramNode programNode -> generate(programNode);
+            case BlockNode blockNode -> generate(blockNode);
+            case BinOpNode binOpNode -> generate(binOpNode);
+            case UnaryOpNode unaryOpNode -> generate(unaryOpNode);
+            case ObjectCallNode objectCallNode -> generate(objectCallNode);
+            case ArrayCallNode arrayCallNode -> generate(arrayCallNode);
+            case FunctionCallNode functionCallNode -> generate(functionCallNode);
+            case FunctionDefinitionNode functionDefinitionNode -> generate(functionDefinitionNode);
+            case ObjectLiteralNode objectLiteralNode -> generate(objectLiteralNode);
+            case ArrayLiteralNode arrayLiteralNode -> generate(arrayLiteralNode);
+            case FieldNode fieldNode -> generate(fieldNode);
+            case ReturnNode returnNode -> generate(returnNode);
+            case AssignNode assignNode -> generate(assignNode);
+            case WhileNode whileNode -> generate(whileNode);
+            case ElseNode elseNode -> generate(elseNode);
+            case ElifNode elifNode -> generate(elifNode);
+            case IfNode ifNode -> generate(ifNode);
+            case ForNode forNode -> generate(forNode);
+            default -> output;
+        };
     }
 
     private StringBuilder generate(TerminalAstNode node) {
         String name = node.getName();
         if (isNumeric(name)) {
-            return new StringBuilder("PUSH N").append(name);
+            return output.append("PUSH N").append(name);
         } else if (isDouble(name)) {
-            return new StringBuilder("PUSH D").append(name);
+            return output.append("PUSH D").append(name);
         } else if (isBoolean(name)) {
-            return new StringBuilder("PUSH B").append(name);
+            return output.append("PUSH B").append(name);
         } else if (isString(name)) {
-            return new StringBuilder("PUSH \"").append(name).append("\"");
+            return output.append("PUSH \"").append(name).append("\"");
         } else if (isChar(name)) {
-            return new StringBuilder("PUSH '").append(name).append("'");
+            return output.append("PUSH '").append(name).append("'");
         } else {
-            return new StringBuilder("PUSH \"").append(name).append("\"");
+            return output.append("PUSH \"").append(name).append("\"");
         }
     }
 
     private StringBuilder generate(BlockNode node) {
-        StringBuilder sb = new StringBuilder();
         for (AstNode child : node.children) {
-            sb.append(generate(child)).append("\n");
+            output.append(generate(child)).append("\n");
         }
-        return sb;
+        return output;
     }
 
     private StringBuilder generate(BinOpNode node) {
-        StringBuilder sb = generate(node.getChild(0))
+        output.append(generate(node.getChild(0)))
                 .append("\n")
                 .append(generate(node.getChild(1)))
                 .append("\n");
-        switch (node.getName()) {
-            case "+":
-                sb.append("ADD");
-                break;
-            case "-":
-                sb.append("SUB");
-                break;
-            case "*":
-                sb.append("MUL");
-                break;
-            case "/":
-                sb.append("DIV");
-                break;
-            case "%":
-                sb.append("MOD");
-                break;
-            case "==":
-                sb.append("EQ");
-                break;
-            case "!=":
-                sb.append("NEQ");
-                break;
-            case ">":
-                sb.append("GT");
-                break;
-            case ">=":
-                sb.append("GTE");
-                break;
-            case "<":
-                sb.append("LT");
-                break;
-            case "<=":
-                sb.append("LTE");
-                break;
-        }
-        return sb;
+        String operator = switch (node.getName()) {
+            case "+" -> "ADD";
+            case "-" -> "SUB";
+            case "*" -> "MUL";
+            case "/" -> "DIV";
+            case "%" -> "MOD";
+            case "==" -> "EQ";
+            case "!=" -> "NEQ";
+            case ">" -> "GT";
+            case ">=" -> "GTE";
+            case "<" -> "LT";
+            case "<=" -> "LTE";
+            default -> throw new RuntimeException("Unknown binop");
+        };
+        output.append(operator);
+        return output;
     }
 
     private StringBuilder generate(UnaryOpNode node) {
-        StringBuilder sb = generate(node
-                .getChild(0)).append("\n");
-        switch (node.getName()) {
-            case "-":
-                sb.append("NEG");
-                break;
-            case "!":
-                sb.append("NOT");
-                break;
-        }
-        return sb;
+        output.append(generate(node.getChild(0)).append("\n"));
+        String operator = switch (node.getName()) {
+            case "-" -> "NEG";
+            case "!" -> "NOT";
+            default -> throw new RuntimeException("Unknown unop");
+        };
+        output.append(operator);
+        return output;
     }
 
     private StringBuilder generate(ObjectCallNode node) {
-        return generate(node.getChild(0))
+        var result = generate(node.getChild(0))
                 .append("\n")
                 .append("PUSH ")
                 .append(node.getChild(1).getName())
                 .append("\nGETFIELD");
+        return output.append(result);
     }
 
     private StringBuilder generate(ArrayCallNode node) {
-        return generate(node.getChild(0))
+        var result = generate(node.getChild(0))
                 .append("\n")
                 .append(generate(node.getChild(1)))
                 .append("\nALOAD");
+        return output;
     }
 
     private StringBuilder generate(FunctionCallNode node) {
         StringBuilder sb = generate(node.getChild(0)).append("\n");
+        output.append(sb);
         for (int i = 1; i < node.getChildrenAmount(); i++) {
             sb.append(generate(node.getChild(i))).append("\n");
         }
-        return sb.append("CALLFUNC");
+        return output.append("CALLFUNC");
     }
 
     private StringBuilder generate(FieldNode node) {
-        return new StringBuilder()
+        return output
                 .append(generate(node.getChild(1)))
                 .append("\n")
                 .append(generate(node.getChild(0)))
@@ -164,32 +127,32 @@ public class CodeGeneration {
     }
 
     private StringBuilder generate(FunctionDefinitionNode node) {
-        StringBuilder sb = new StringBuilder("NEWFUNC ");
-        sb.append(node.getName())
+        output.append("NEWFUNC ");
+        output.append(node.getName())
                 .append(" ")
                 .append(node.getChildrenAmount() - 2)
                 .append("\n");
         for (int i = 1; i < node.getChildrenAmount() - 1; i++) {
-            sb.append(node.getChild(i).getName()).append(" ");
+            output.append(node.getChild(i).getName()).append(" ");
         }
-        return sb.append("\n")
+        return output.append("\n")
                 .append(generate(node.getChild(node.getChildrenAmount() - 1)));
     }
 
     private StringBuilder generate(ObjectLiteralNode node) {
-        StringBuilder sb = new StringBuilder("NEWOBJECT\n");
+        output.append("NEWOBJECT\n");
         for (AstNode child : node.children) {
-            sb.append(generate(child)).append("\n");
+            output.append(generate(child)).append("\n");
         }
-        return sb;
+        return output;
     }
 
     private StringBuilder generate(ArrayLiteralNode node) {
-        StringBuilder sb = new StringBuilder("NEWARRAY\n");
+        output.append("NEWARRAY\n");
         for (AstNode child : node.children) {
-            sb.append(generate(child)).append("\n");
+            output.append(generate(child)).append("\n");
         }
-        return sb;
+        return output;
     }
 
 // private StringBuilder generate(FieldNode node) {
@@ -209,12 +172,12 @@ public class CodeGeneration {
     }
 
     private StringBuilder generate(WhileNode node) {
-        StringBuilder sb = new StringBuilder("start_while:\n");
-        sb.append(generate(node.getChild(0)))
+        output.append("start_while:\n");
+        output.append(generate(node.getChild(0)))
                 .append("\nJMF end_while\n")
                 .append(generate(node.getChild(1)))
                 .append("\nJMP start_while\nend_while:");
-        return sb;
+        return output;
     }
 
     private StringBuilder generate(ElseNode node) {
@@ -222,7 +185,7 @@ public class CodeGeneration {
     }
 
     private StringBuilder generate(ElifNode node) {
-        return new StringBuilder("elif\n")
+        return output.append("elif\n")
                 .append(generate(node.getChild(0)))
                 .append("\nJMT elif_body\n")
                 .append(generate(node.getChild(1)))
@@ -230,17 +193,17 @@ public class CodeGeneration {
     }
 
     private StringBuilder generate(IfNode node) {
-        StringBuilder sb = new StringBuilder("if\n");
-        sb.append(generate(node.getChild(0)))
+        output.append("if\n");
+        output.append(generate(node.getChild(0)))
                 .append("\nJMF else_block\n")
                 .append(generate(node.getChild(1)))
                 .append("\nJMP end_if\nelse_block:");
         for (int i = 2; i < node.getChildrenAmount() - 1; i++) {
-            sb.append(generate(node.getChild(i))).append("\n");
+            output.append(generate(node.getChild(i))).append("\n");
         }
-        sb.append(generate(node.getChild(node.getChildrenAmount() - 1)))
+        output.append(generate(node.getChild(node.getChildrenAmount() - 1)))
                 .append("\nend_if:");
-        return sb;
+        return output;
     }
 
     private StringBuilder generate(ProgramNode node) {
@@ -252,7 +215,7 @@ public class CodeGeneration {
     }
 
     private StringBuilder generate(ForNode node) {
-        return new StringBuilder("for\n")
+        return output.append("for\n")
                 .append(generate(node.getChild(1)))
                 .append("\nstart_for:\n")
                 .append(generate(node.getChild(0)))
@@ -289,10 +252,10 @@ public class CodeGeneration {
     }
 
     public void writeToFile(String filename, AstNode node) {
-        StringBuilder code = new StringBuilder("#main\n");
-        code.append(generate(node));
+        output.append("#main\n");
+        output.append(generate(node));
         try (FileWriter writer = new FileWriter(filename)) {
-            writer.write(code.toString());
+            writer.write(output.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
