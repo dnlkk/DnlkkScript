@@ -2,232 +2,248 @@ package ru.vsu.dnlkkandco;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 
 public class CodeGeneration {
 
     private final StringBuilder output = new StringBuilder();
+    private int a;
+    private int b;
+    private int c;
+    private int d;
 
-    public StringBuilder generate(AstNode node) {
-        return switch (node) {
-            case TerminalAstNode terminalAstNode -> generate(terminalAstNode);
-            case ProgramNode programNode -> generate(programNode);
-            case BlockNode blockNode -> generate(blockNode);
-            case BinOpNode binOpNode -> generate(binOpNode);
-            case UnaryOpNode unaryOpNode -> generate(unaryOpNode);
-            case ObjectCallNode objectCallNode -> generate(objectCallNode);
-            case ArrayCallNode arrayCallNode -> generate(arrayCallNode);
-            case FunctionCallNode functionCallNode -> generate(functionCallNode);
-            case FunctionDefinitionNode functionDefinitionNode -> generate(functionDefinitionNode);
-            case ObjectLiteralNode objectLiteralNode -> generate(objectLiteralNode);
-            case ArrayLiteralNode arrayLiteralNode -> generate(arrayLiteralNode);
-            case FieldNode fieldNode -> generate(fieldNode);
-            case ReturnNode returnNode -> generate(returnNode);
-            case AssignNode assignNode -> generate(assignNode);
-            case WhileNode whileNode -> generate(whileNode);
-            case ElseNode elseNode -> generate(elseNode);
-            case ElifNode elifNode -> generate(elifNode);
-            case IfNode ifNode -> generate(ifNode);
-            case ForNode forNode -> generate(forNode);
-            default -> output;
-        };
+    public String generate(AstNode node) {
+        output.setLength(0);
+        output.append("#main\n");
+        processNode(node);
+        return output.toString();
     }
 
-    private StringBuilder generate(TerminalAstNode node) {
+    private void processNode(AstNode node) {
+        if (node != null) {
+            switch (node) {
+                case TerminalAstNode terminalAstNode -> processTerminal(terminalAstNode);
+                case ProgramNode programNode -> processProgram(programNode);
+                case BlockNode blockNode -> processBlock(blockNode);
+                case BinOpNode binOpNode -> processBinOp(binOpNode);
+                case UnaryOpNode unaryOpNode -> processUnaryOp(unaryOpNode);
+                case ObjectCallNode objectCallNode -> processObjectCall(objectCallNode);
+                case ArrayCallNode arrayCallNode -> processArrayCall(arrayCallNode);
+                case FunctionCallNode functionCallNode -> processFunctionCall(functionCallNode);
+                case FunctionDefinitionNode functionDefinitionNode -> processFunctionDefinition(functionDefinitionNode);
+                case ObjectLiteralNode objectLiteralNode -> processObjectLiteral(objectLiteralNode);
+                case ArrayLiteralNode arrayLiteralNode -> processArrayLiteral(arrayLiteralNode);
+                case FieldNode fieldNode -> processField(fieldNode);
+                case ReturnNode returnNode -> processReturn(returnNode);
+                case AssignNode assignNode -> processAssign(assignNode);
+                case WhileNode whileNode -> processWhile(whileNode);
+                case ElseNode elseNode -> processElse(elseNode);
+                case ElifNode elifNode -> processElif(elifNode);
+                case IfNode ifNode -> processIf(ifNode);
+                case ForNode forNode -> processFor(forNode);
+                default -> throw new IllegalArgumentException("Unsupported AST node type");
+            }
+        }
+
+    }
+
+    private void processTerminal(TerminalAstNode node) {
         String name = node.getName();
         if (isNumeric(name)) {
-            return output.append("PUSH N").append(name);
+            output.append("PUSH N").append(name).append("\n");
         } else if (isDouble(name)) {
-            return output.append("PUSH D").append(name);
+            output.append("PUSH D").append(name).append("\n");
         } else if (isBoolean(name)) {
-            return output.append("PUSH B").append(name);
-        } else if (isString(name)) {
-            return output.append("PUSH \"").append(name).append("\"");
-        } else if (isChar(name)) {
-            return output.append("PUSH '").append(name).append("'");
+            output.append("PUSH B").append(name).append("\n");
+        } else if (isStringLiteral(name)) {
+            output.append("PUSH \"").append(name).append("\"\n");
         } else {
-            return output.append("PUSH \"").append(name).append("\"");
+            output.append("PUSH \"").append(name).append("\"\n").append("LOAD\n");
         }
     }
 
-    private StringBuilder generate(BlockNode node) {
+    private boolean isStringLiteral(String name) {
+        return name.startsWith("\"") && name.endsWith("\"");
+    }
+
+    private void processProgram(ProgramNode node) {
         for (AstNode child : node.children) {
-            output.append(generate(child)).append("\n");
+            processNode(child);
         }
-        return output;
     }
 
-    private StringBuilder generate(BinOpNode node) {
-        output.append(generate(node.getChild(0)))
-                .append("\n")
-                .append(generate(node.getChild(1)))
-                .append("\n");
-        String operator = switch (node.getName()) {
-            case "+" -> "ADD";
-            case "-" -> "SUB";
-            case "*" -> "MUL";
-            case "/" -> "DIV";
-            case "%" -> "MOD";
-            case "==" -> "EQ";
-            case "!=" -> "NEQ";
-            case ">" -> "GT";
-            case ">=" -> "GTE";
-            case "<" -> "LT";
-            case "<=" -> "LTE";
-            default -> throw new RuntimeException("Unknown binop");
-        };
-        output.append(operator);
-        return output;
+    private void processBlock(BlockNode node) {
+        for (AstNode child : node.children) {
+            processNode(child);
+        }
     }
 
-    private StringBuilder generate(UnaryOpNode node) {
-        output.append(generate(node.getChild(0)).append("\n"));
+    private void processBinOp(BinOpNode node) {
+
+        if (node.getName().equals("var")){
+            processNode(node.getChild(1));
+            output.append("PUSH \"").append(node.getChild(0).getName()).append("\"\n").append("SET\n");
+        } else {
+            processNode(node.getChild(0));
+            processNode(node.getChild(1));
+            String operator = switch (node.getName()) {
+                case "+" -> "ADD";
+                case "-" -> "SUB";
+                case "*" -> "MUL";
+                case "/" -> "DIV";
+                case "%" -> "MOD";
+                case "==" -> "EQ";
+                case "!=" -> "NEQ";
+                case ">" -> "GT";
+                case ">=" -> "GTE";
+                case "<" -> "LT";
+                case "<=" -> "LTE";
+                default -> throw new RuntimeException("Unknown binop");
+            };
+            output.append(operator).append("\n");
+        }
+    }
+
+
+    private void processUnaryOp(UnaryOpNode node) {
+        processNode(node.getChild(0));
         String operator = switch (node.getName()) {
             case "-" -> "NEG";
             case "!" -> "NOT";
             default -> throw new RuntimeException("Unknown unop");
         };
-        output.append(operator);
-        return output;
+        output.append(operator).append("\n");
     }
 
-    private StringBuilder generate(ObjectCallNode node) {
-        var result = generate(node.getChild(0))
-                .append("\n")
-                .append("PUSH ")
-                .append(node.getChild(1).getName())
-                .append("\nGETFIELD");
-        return output.append(result);
+    private void processObjectCall(ObjectCallNode node) {
+        processNode(node.getChild(1));
+        output.append("PUSH \"").append(node.getChild(0).getName()).append("\"\n").append("LOAD\n")
+                .append("GETFIELD\n");
     }
 
-    private StringBuilder generate(ArrayCallNode node) {
-        var result = generate(node.getChild(0))
-                .append("\n")
-                .append(generate(node.getChild(1)))
-                .append("\nALOAD");
-        return output;
+    private void processArrayCall(ArrayCallNode node) {
+        processNode(node.getChild(0));
+        processNode(node.getChild(1));
+        output.append("ALOAD\n");
     }
 
-    private StringBuilder generate(FunctionCallNode node) {
-        StringBuilder sb = generate(node.getChild(0)).append("\n");
-        output.append(sb);
+    private void processFunctionCall(FunctionCallNode node) {
+        processNode(node.getChild(0));
         for (int i = 1; i < node.getChildrenAmount(); i++) {
-            sb.append(generate(node.getChild(i))).append("\n");
+            processNode(node.getChild(i));
         }
-        return output.append("CALLFUNC");
+        output.append("CALLFUNC\n");
     }
 
-    private StringBuilder generate(FieldNode node) {
-        return output
-                .append(generate(node.getChild(1)))
-                .append("\n")
-                .append(generate(node.getChild(0)))
-                .append("\nSETFIELD ")
-                .append('"').append(node.getChild(1).getName()).append('"');
-    }
-
-    private StringBuilder generate(FunctionDefinitionNode node) {
-        output.append("NEWFUNC ");
-        output.append(node.getName())
-                .append(" ")
-                .append(node.getChildrenAmount() - 2)
-                .append("\n");
+    private void processFunctionDefinition(FunctionDefinitionNode node) {
+        output.append("NEWFUNC ").append(node.getName()).append(" ")
+                .append(node.getChildrenAmount() - 2).append("\n");
         for (int i = 1; i < node.getChildrenAmount() - 1; i++) {
             output.append(node.getChild(i).getName()).append(" ");
         }
-        return output.append("\n")
-                .append(generate(node.getChild(node.getChildrenAmount() - 1)));
+        output.append("\n");
+        processNode(node.getChild(node.getChildrenAmount() - 1));
     }
 
-    private StringBuilder generate(ObjectLiteralNode node) {
+    private void processObjectLiteral(ObjectLiteralNode node) {
         output.append("NEWOBJECT\n");
         for (AstNode child : node.children) {
-            output.append(generate(child)).append("\n");
+            processNode(child);
         }
-        return output;
     }
 
-    private StringBuilder generate(ArrayLiteralNode node) {
+    private void processArrayLiteral(ArrayLiteralNode node) {
         output.append("NEWARRAY\n");
-        for (AstNode child : node.children) {
-            output.append(generate(child)).append("\n");
+        for (int i = 0; i < node.getChildrenAmount(); i++) {
+            output.append("DUP\n");
+            processNode(node.getChild(i));
+            output.append("PUSH" + " N" + i + "\n");
+            output.append("ASET\n");
         }
-        return output;
     }
 
-// private StringBuilder generate(FieldNode node) {
-// return generate(node.getChild(0))
-// .append("\n")
-// .append(generate(node.getChild(1)))
-// .append("\nSETFIELD");
-// }
-
-    private StringBuilder generate(ReturnNode node) {
-        return generate(node.getChild(0)).append("\nRETURN");
+    private void processField(FieldNode node) {
+        processNode(node.getChild(1));
+        processNode(node.getChild(0));
+        output.append("LOAD\n").append("SETFIELD").append(node.getChild(0).getName()).append("\n");
     }
 
-    private StringBuilder generate(AssignNode node) {
-        return generate(node.getChild(1))
-                .append("\nSET ");
+    private void processReturn(ReturnNode node) {
+        processNode(node.getChild(0));
+        output.append("RETURN\n");
     }
 
-    private StringBuilder generate(WhileNode node) {
-        output.append("start_while:\n");
-        output.append(generate(node.getChild(0)))
-                .append("\nJMF end_while\n")
-                .append(generate(node.getChild(1)))
-                .append("\nJMP start_while\nend_while:");
-        return output;
+    private void processAssign(AssignNode node) {
+        if (node.getChild(0) instanceof ObjectCallNode) {
+            processNode(node.getChild(1));
+            output.append("PUSH \"").append(node.getChild(0).getChild(1).getName()).append("\"\n");
+            output.append("PUSH \"").append(node.getChild(0).getChild(0).getName()).append("\"\n").append("LOAD\n")
+                    .append("SETFIELD\n");
+        } else if (node.getChild(0) instanceof ArrayCallNode) {
+            output.append("PUSH \"").append(node.getChild(0).getChild(0).getName()).append("\"\n").append("LOAD\n")
+                    .append("PUSH \"").append(node.getChild(0).getChild(1).getName()).append("\"\n");
+            processNode(node.getChild(1));
+            output.append("ASET\n");
+        }
+        processNode(node.getChild(0));
+        output.append("SET\n").append("PUSH \"").append(node.getChild(0).getName()).append("\"\n");
     }
 
-    private StringBuilder generate(ElseNode node) {
-        return generate(node.getChild(0));
+    private void processWhile(WhileNode node) {
+        output.append("#start_while").append(c).append("\n");
+        processNode(node.getChild(0));
+        output.append("JMF #end_while").append(c).append("\n");
+        ;
+        processNode(node.getChild(1));
+        output.append("JMP #start_while").append(c).append("\n").append("#end_while").append(c).append("\n");
+        c++;
     }
 
-    private StringBuilder generate(ElifNode node) {
-        return output.append("elif\n")
-                .append(generate(node.getChild(0)))
-                .append("\nJMT elif_body\n")
-                .append(generate(node.getChild(1)))
-                .append("\nelif_body:");
+    private void processElse(ElseNode node) {
+        processNode(node.getChild(0));
     }
 
-    private StringBuilder generate(IfNode node) {
-        output.append("if\n");
-        output.append(generate(node.getChild(0)))
-                .append("\nJMF else_block\n")
-                .append(generate(node.getChild(1)))
-                .append("\nJMP end_if\nelse_block:");
+    private void processElif(ElifNode node) {
+        output.append("#elif").append(d).append("\n");
+        processNode(node.getChild(0));
+        output.append("JMT #elif_body").append(d).append("\n");
+        processNode(node.getChild(1));
+        output.append("#elif_body").append(d).append("\n");
+        d++;
+    }
+
+    private void processIf(IfNode node) {
+        output.append("#if").append(a).append("\n");
+        processNode(node.getChild(0));
+        output.append("JMF #else_block").append(a).append("\n");
+        processNode(node.getChild(1));
+        output.append("JMP #end_if").append(a).append("\n").append("else_block").append(a).append("\n");
         for (int i = 2; i < node.getChildrenAmount() - 1; i++) {
-            output.append(generate(node.getChild(i))).append("\n");
+            processNode(node.getChild(i));
         }
-        output.append(generate(node.getChild(node.getChildrenAmount() - 1)))
-                .append("\nend_if:");
-        return output;
+        processNode(node.getChild(node.getChildrenAmount() - 1));
+        output.append("#end_if").append(a).append("\n");
+        a++;
     }
 
-    private StringBuilder generate(ProgramNode node) {
-        StringBuilder sb = new StringBuilder();
-        for (AstNode child : node.children) {
-            sb.append(generate(child)).append("\n");
-        }
-        return sb;
-    }
-
-    private StringBuilder generate(ForNode node) {
-        return output.append("for\n")
-                .append(generate(node.getChild(1)))
-                .append("\nstart_for:\n")
-                .append(generate(node.getChild(0)))
-                .append("\n")
-                .append(generate(node.getChild(2)))
-                .append("\n")
-                .append(generate(node.getChild(3)))
-                .append("\nJMP start_for\nend_for:");
+    private void processFor(ForNode node) {
+        processNode(node.getChild(0));
+        output.append("#for").append(b).append("\n");
+        processNode(node.getChild(1));
+        output.append("JMF end_for").append(b).append("\n");
+        processNode(node.getChild(3));
+        processNode(node.getChild(2));
+        output.append("JMP for").append(b).append("\n");
+        output.append("#end_for").append(b).append("\n");
+        b++;
     }
 
     private boolean isNumeric(String str) {
-        return str.matches("-?\\d+(\\.\\d+)?");
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private boolean isDouble(String str) {
@@ -243,21 +259,82 @@ public class CodeGeneration {
         return str.equalsIgnoreCase("true") || str.equalsIgnoreCase("false");
     }
 
-    private boolean isString(String str) {
-        return str.startsWith("\"") && str.endsWith("\"");
-    }
-
-    private boolean isChar(String str) {
-        return str.startsWith("'") && str.endsWith("'");
-    }
-
     public void writeToFile(String filename, AstNode node) {
-        output.append("#main\n");
-        output.append(generate(node));
         try (FileWriter writer = new FileWriter(filename)) {
-            writer.write(output.toString());
+            writer.write(generate(node));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 }
+
+//#main
+//        NEWARRAY
+//dup
+//PUSH N1
+//PUSH N0
+//ASET
+//        DUP
+//PUSH N2
+//PUSH N1
+//ASET
+//        DUP
+//PUSH N3
+//PUSH N2
+//ASET
+//PUSH "a"
+//SET
+//for
+//PUSH "a"
+//LOAD
+//PUSH N0
+//ALOAD
+//PUSH N2
+//LT
+//JMF end_for
+//#start_for
+//PUSH N3
+//PUSH N5
+//PUSH N2
+//ADD
+//        MUL
+//PUSH N3
+//PUSH N1
+//ADD
+//        ADD
+//PUSH "c"
+//SET
+//        NEWARRAY
+//dup
+//PUSH N0
+//PUSH "a"
+//LOAD
+//        ASET
+//dup
+//PUSH N1
+//PUSH "b"
+//LOAD
+//        ASET
+//PUSH "c"
+//LOAD
+//PUSH N2
+//ALOAD
+//PUSH "foo"
+//GETFIELD
+//        CALLFUNC
+//PUSH N0
+//ALOAD
+//        RETURN
+//PUSH "a"
+//LOAD
+//PUSH "a"
+//LOAD
+//PUSH N0
+//ALOAD
+//PUSH N2
+//ADD
+//PUSH N0
+//ASET
+//JMP #start_for
+//#end_for
+//        HALT
