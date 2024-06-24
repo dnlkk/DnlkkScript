@@ -6,10 +6,10 @@ import java.io.IOException;
 public class CodeGeneration {
 
     private final StringBuilder output = new StringBuilder();
-    private int a;
-    private int b;
-    private int c;
-    private int d;
+    private int counterForIf;
+    private int counterForFor;
+    private int counterForWhile;
+    private int counterForElif;
 
     public String generate(AstNode node) {
         output.setLength(0);
@@ -61,9 +61,7 @@ public class CodeGeneration {
         }
     }
 
-    private boolean isStringLiteral(String name) {
-        return name.startsWith("\"") && name.endsWith("\"");
-    }
+
 
     private void processProgram(ProgramNode node) {
         for (AstNode child : node.children) {
@@ -78,7 +76,6 @@ public class CodeGeneration {
     }
 
     private void processBinOp(BinOpNode node) {
-
         if (node.getName().equals("var")){
             processNode(node.getChild(1));
             output.append("PUSH \"").append(node.getChild(0).getName()).append("\"\n").append("SET\n");
@@ -189,13 +186,13 @@ public class CodeGeneration {
     }
 
     private void processWhile(WhileNode node) {
-        output.append("#start_while").append(c).append("\n");
+        output.append("#start_while").append(counterForWhile).append("\n");
         processNode(node.getChild(0));
-        output.append("JMF #end_while").append(c).append("\n");
+        output.append("JMF #end_while").append(counterForWhile).append("\n");
         ;
         processNode(node.getChild(1));
-        output.append("JMP #start_while").append(c).append("\n").append("#end_while").append(c).append("\n");
-        c++;
+        output.append("JMP #start_while").append(counterForWhile).append("\n").append("#end_while").append(counterForWhile).append("\n");
+        counterForWhile++;
     }
 
     private void processElse(ElseNode node) {
@@ -203,38 +200,40 @@ public class CodeGeneration {
     }
 
     private void processElif(ElifNode node) {
-        output.append("#elif").append(d).append("\n");
+        output.append("#elif").append(counterForElif).append("\n");
         processNode(node.getChild(0));
-        output.append("JMT #elif_body").append(d).append("\n");
+        output.append("JMT #elif_body").append(counterForElif).append("\n");
         processNode(node.getChild(1));
-        output.append("#elif_body").append(d).append("\n");
-        d++;
+        output.append("#elif_body").append(counterForElif).append("\n");
+        counterForElif++;
     }
 
     private void processIf(IfNode node) {
-        output.append("#if").append(a).append("\n");
+        output.append("#if").append(counterForIf).append("\n");
         processNode(node.getChild(0));
-        output.append("JMF #else_block").append(a).append("\n");
+        output.append("JMF #elif_block").append(counterForIf).append("\n");
+        processNode(node.getChild(2));
+        output.append("JMF #else_block").append(counterForIf).append("\n");
         processNode(node.getChild(1));
-        output.append("JMP #end_if").append(a).append("\n").append("else_block").append(a).append("\n");
+        output.append("JMP #end_if").append(counterForIf).append("\n").append("else_block").append(counterForIf).append("\n");
         for (int i = 2; i < node.getChildrenAmount() - 1; i++) {
             processNode(node.getChild(i));
         }
         processNode(node.getChild(node.getChildrenAmount() - 1));
-        output.append("#end_if").append(a).append("\n");
-        a++;
+        output.append("#end_if").append(counterForIf).append("\n");
+        counterForIf++;
     }
 
     private void processFor(ForNode node) {
         processNode(node.getChild(0));
-        output.append("#for").append(b).append("\n");
+        output.append("#for").append(counterForFor).append("\n");
         processNode(node.getChild(1));
-        output.append("JMF end_for").append(b).append("\n");
+        output.append("JMF end_for").append(counterForFor).append("\n");
         processNode(node.getChild(3));
         processNode(node.getChild(2));
-        output.append("JMP for").append(b).append("\n");
-        output.append("#end_for").append(b).append("\n");
-        b++;
+        output.append("JMP for").append(counterForFor).append("\n");
+        output.append("#end_for").append(counterForFor).append("\n");
+        counterForFor++;
     }
 
     private boolean isNumeric(String str) {
@@ -257,6 +256,10 @@ public class CodeGeneration {
 
     private boolean isBoolean(String str) {
         return str.equalsIgnoreCase("true") || str.equalsIgnoreCase("false");
+    }
+
+    private boolean isStringLiteral(String name) {
+        return name.startsWith("\"") && name.endsWith("\"");
     }
 
     public void writeToFile(String filename, AstNode node) {
