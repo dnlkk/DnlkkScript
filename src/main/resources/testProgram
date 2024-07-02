@@ -1,13 +1,18 @@
-var a = 3
-if (a < 5) {
-    a = a + 1
-} elif (a < 10) {
-    a = a + 5
-} elif (a < 15) {
-    a = a + 10
-} else {
-    a = 0
+
+a = 4
+b = 5
+func(a, b)
+
+fun func (a, b) {
+    var c = a + b
+    return c
 }
+
+
+
+
+
+
 
 
 
