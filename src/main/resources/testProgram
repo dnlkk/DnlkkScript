@@ -1,5 +1,26 @@
-var a = [1,2,3]
-for (; a[0] < 2; a[0] = a[0] + 2) {
-    var c = 3 * (5 + 2) + (3 + 1)
-    return c[2].foo(a,b)[0]
+
+a = 4
+b = 5
+func(a, b)
+
+fun func (a, b) {
+    var c = a + b
+    return c
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

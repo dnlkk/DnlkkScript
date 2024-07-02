@@ -20,14 +20,19 @@ public class DnlkkScript {
 
         DnlkkRulesParser parser = new DnlkkRulesParser(tokens);
 
+        CodeGeneration codeGeneration = new CodeGeneration();
+
         ParseTree tree = parser.program();
         try {
             AstNode node = tree.accept(new AstBuilderVisitor());
+            System.out.println(node.toString());
             String result = treeViewAst(node);
             System.out.println(result);
+            codeGeneration.writeToFile("D:\\DnlkkScriptе\\src\\main\\resources\\output.txt", node);
         } catch (Exception e) {
             System.err.println("Parsing error");
             System.err.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
