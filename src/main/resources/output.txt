@@ -14,3 +14,30 @@ ADD
 PUSH "a"
 SET
 #end_if0
+PUSH "a"
+LOAD
+PUSH N10
+LT
+JMF elif_end0
+PUSH "a"
+LOAD
+PUSH N5
+ADD
+PUSH "a"
+SET
+#elif_end0
+PUSH "a"
+LOAD
+PUSH N15
+LT
+JMF elif_end1
+PUSH "a"
+LOAD
+PUSH N10
+ADD
+PUSH "a"
+SET
+#elif_end1
+PUSH N0
+PUSH "a"
+SET

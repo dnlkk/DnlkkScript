@@ -200,12 +200,12 @@ public class CodeGeneration {
     }
 
     private void processElif(ElifNode node) {
-        output.append("#elif").append(counterForElif).append("\n");
-        processNode(node.getChild(0));
-        output.append("JMT #elif_body").append(counterForElif).append("\n");
-        processNode(node.getChild(1));
-        output.append("#elif_body").append(counterForElif).append("\n");
+        int elif = counterForElif;
         counterForElif++;
+        processNode(node.getChild(0));
+        output.append("JMF elif_end").append(elif).append("\n");
+        processNode(node.getChild(1));
+        output.append("#elif_end").append(elif).append("\n");
     }
 
     private void processIf(IfNode node) {
@@ -215,6 +215,10 @@ public class CodeGeneration {
         output.append("JMF end_if").append(endIf).append("\n");
         processNode(node.getChild(1));
         output.append("#end_if").append(endIf).append("\n");
+        for (int i = 2; i < node.getChildrenAmount() - 1; i++) {
+            processNode(node.getChild(i));
+        }
+        processNode(node.getChild(node.getChildrenAmount() - 1));
     }
 
     private void processFor(ForNode node) {
