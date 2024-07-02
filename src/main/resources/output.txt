@@ -1,0 +1,49 @@
+#main
+push "#func"
+newfunc
+push "func"
+set
+push N4
+push "a"
+set
+push N5
+push "b"
+set
+newarray
+dup
+push N0
+push "a"
+load
+aset
+dup
+push N1
+push "b"
+load
+aset
+push "func"
+load
+callfunc
+
+#func
+push "__args__"
+load
+push N0
+aload
+push "a"
+set
+push "__args__"
+load
+push N1
+aload
+push "b"
+set
+push "a"
+load
+push "b"
+load
+add
+push "c"
+SET
+push "c"
+load
+return

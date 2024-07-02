@@ -272,9 +272,12 @@ public class AstBuilderVisitor extends DnlkkRulesBaseVisitor<AstNode> {
         for (var elif: ctx.elif()) {
             elifs.add(visitElif(elif));
         }
-
+        AstNode else_ = null;
+        if (ctx.else_() != null){
+            else_ = visitElse(ctx.else_());
+        }
         return new IfNode(visitExpr(ctx.expr()), body,
-                elifs, visitElse(ctx.else_()));
+                elifs, else_);
     }
 
     @Override
