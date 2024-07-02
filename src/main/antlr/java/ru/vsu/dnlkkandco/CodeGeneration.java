@@ -16,7 +16,6 @@ public class CodeGeneration {
         output.setLength(0);
         output.append("#main\n");
         processNode(node);
-        output.append(function);
         return output.toString();
     }
 
@@ -144,13 +143,13 @@ public class CodeGeneration {
     private void processFunctionDefinition(FunctionDefinitionNode node) {
         String functionName = node.getChild(0).getName();
         output.append("\n");
-        function.append("#").append(functionName).append("\n");
+        output.append("#").append(functionName).append("\n");
         for (int i = 1; i < node.getChildrenAmount() - 1; i++) {
-            function.append("push \"__args__\"\nload\n");
-            function.append("push N").append(i - 1).append("\naload\n");
-            function.append("push \"").append(node.getChild(i).getName()).append("\"\nset\n");
+            output.append("push \"__args__\"\nload\n");
+            output.append("push N").append(i - 1).append("\naload\n");
+            output.append("push \"").append(node.getChild(i).getName()).append("\"\nset\n");
         }
-        function.append(node.getChild(node.getChildrenAmount() - 1));
+        processNode(node.getChild(node.getChildrenAmount() - 1));
     }
 
     private void processObjectLiteral(ObjectLiteralNode node) {

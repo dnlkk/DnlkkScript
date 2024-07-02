@@ -37,4 +37,13 @@ push N1
 aload
 push "b"
 set
-ru.vsu.dnlkkandco.BlockNode@5d76b067
+push "a"
+load
+push "b"
+load
+add
+push "c"
+SET
+push "c"
+load
+return
