@@ -181,8 +181,8 @@ public class CodeGeneration {
             processNode(node.getChild(1));
             output.append("ASET\n");
         }
-        processNode(node.getChild(0));
-        output.append("SET\n").append("PUSH \"").append(node.getChild(0).getName()).append("\"\n");
+        processNode(node.getChild(1));
+        output.append("PUSH \"").append(node.getChild(0).getName()).append("\"\n").append("SET\n");
     }
 
     private void processWhile(WhileNode node) {
@@ -209,19 +209,12 @@ public class CodeGeneration {
     }
 
     private void processIf(IfNode node) {
-        output.append("#if").append(counterForIf).append("\n");
-        processNode(node.getChild(0));
-        output.append("JMF #elif_block").append(counterForIf).append("\n");
-        processNode(node.getChild(2));
-        output.append("JMF #else_block").append(counterForIf).append("\n");
-        processNode(node.getChild(1));
-        output.append("JMP #end_if").append(counterForIf).append("\n").append("else_block").append(counterForIf).append("\n");
-        for (int i = 2; i < node.getChildrenAmount() - 1; i++) {
-            processNode(node.getChild(i));
-        }
-        processNode(node.getChild(node.getChildrenAmount() - 1));
-        output.append("#end_if").append(counterForIf).append("\n");
+        int endIf = counterForIf;
         counterForIf++;
+        processNode(node.getChild(0));
+        output.append("JMF end_if").append(endIf).append("\n");
+        processNode(node.getChild(1));
+        output.append("#end_if").append(endIf).append("\n");
     }
 
     private void processFor(ForNode node) {
@@ -235,7 +228,6 @@ public class CodeGeneration {
         output.append("#end_for").append(counterForFor).append("\n");
         counterForFor++;
     }
-
     private boolean isNumeric(String str) {
         try {
             Integer.parseInt(str);
