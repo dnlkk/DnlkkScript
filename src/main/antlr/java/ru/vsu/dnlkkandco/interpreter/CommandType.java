@@ -1,4 +1,4 @@
-package ru.vsu.dnlkkandco;
+package ru.vsu.dnlkkandco.interpreter;
 
 public enum CommandType {
     POP, PUSH, SET, LOAD,

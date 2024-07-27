@@ -1,6 +1,6 @@
-package ru.vsu.dnlkkandco;
+package ru.vsu.dnlkkandco.interpreter;
 
-import ru.vsu.dnlkkandco.value.*;
+import ru.vsu.dnlkkandco.interpreter.value.*;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,16 +1,9 @@
-package ru.vsu.dnlkkandco;
-
-import ru.vsu.dnlkkandco.value.ArrayValue;
-import ru.vsu.dnlkkandco.value.StringValue;
-import ru.vsu.dnlkkandco.value.SysCall;
-import ru.vsu.dnlkkandco.value.Value;
+package ru.vsu.dnlkkandco.interpreter;
 
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class SysCallsDefinition {
 

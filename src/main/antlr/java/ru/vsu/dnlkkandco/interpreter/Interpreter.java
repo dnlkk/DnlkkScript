@@ -1,6 +1,6 @@
-package ru.vsu.dnlkkandco;
+package ru.vsu.dnlkkandco.interpreter;
 
-import ru.vsu.dnlkkandco.value.*;
+import ru.vsu.dnlkkandco.interpreter.value.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Interpreter {
     public static void main(String[] args) throws IOException {

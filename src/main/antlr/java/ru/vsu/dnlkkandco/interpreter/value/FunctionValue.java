@@ -1,6 +1,6 @@
-package ru.vsu.dnlkkandco.value;
+package ru.vsu.dnlkkandco.interpreter.value;
 
-import ru.vsu.dnlkkandco.ValueType;
+import ru.vsu.dnlkkandco.interpreter.ValueType;
 
 public class FunctionValue extends Value<String> {
 
