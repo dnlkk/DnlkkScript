@@ -2,6 +2,8 @@ package ru.vsu.dnlkkandco;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vsu.dnlkkandco.gen.DnlkkRulesLexer;
 import ru.vsu.dnlkkandco.gen.DnlkkRulesParser;
 
@@ -9,7 +11,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class DnlkkScript {
+    private static final Logger log = LoggerFactory.getLogger(DnlkkScript.class);
+
     public static void main(String[] args) throws IOException {
+        log.info("Starting DnlkkScript...");
         FileInputStream inputStream = new FileInputStream("src/main/resources/testProgram");
 
         CharStream input = CharStreams.fromStream(inputStream);
@@ -50,5 +55,6 @@ public class DnlkkScript {
             String nodePrefix = last ? "└─" : "├─";
             treeViewAstInner(tree.getChild(i), out, prevPrefix + prefixLine, nextLevelPrefix, nodePrefix);
         }
+        return out;
     }
 }
