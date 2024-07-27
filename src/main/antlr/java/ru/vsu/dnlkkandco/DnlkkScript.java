@@ -13,31 +13,32 @@ import java.io.IOException;
 public class DnlkkScript {
     private static final Logger log = LoggerFactory.getLogger(DnlkkScript.class);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         log.info("Starting DnlkkScript...");
-        FileInputStream inputStream = new FileInputStream("src/main/resources/testProgram");
 
-        CharStream input = CharStreams.fromStream(inputStream);
-
-        DnlkkRulesLexer lexer = new DnlkkRulesLexer(input);
-
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-        DnlkkRulesParser parser = new DnlkkRulesParser(tokens);
-
-        CodeGeneration codeGeneration = new CodeGeneration();
-
-        ParseTree tree = parser.program();
         try {
-            AstNode node = tree.accept(new AstBuilderVisitor());
-            System.out.println(node.toString());
-            String result = treeViewAst(node);
-            System.out.println(result);
-            codeGeneration.writeToFile("D:\\DnlkkScriptе\\src\\main\\resources\\output.txt", node);
+            var sourceFile = "src/main/resources/testProgram";
+            log.debug("Read file {}", sourceFile);
+            var inputStream = new FileInputStream(sourceFile);
+            var input = CharStreams.fromStream(inputStream);
+
+            log.debug("Lexing analyze with {}", DnlkkRulesLexer.class.getName());
+            var lexer = new DnlkkRulesLexer(input);
+            var tokens = new CommonTokenStream(lexer);
+            var parser = new DnlkkRulesParser(tokens);
+
+            var tree = parser.program();
+            var node = tree.accept(new AstBuilderVisitor());
+
+            var byteCodeFile = "D:\\DnlkkScriptе\\src\\main\\resources\\output.txt";
+            log.debug("Write codegeneration result to {}", byteCodeFile);
+            var codeGeneration = new CodeGeneration();
+            codeGeneration.writeToFile(byteCodeFile, node);
+
+            var result = treeViewAst(node);
+            log.debug("Ast tree view:\n{}", result);
         } catch (Exception e) {
-            System.err.println("Parsing error");
-            System.err.println(e.getMessage());
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

@@ -1,10 +1,14 @@
 package ru.vsu.dnlkkandco;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileWriter;
 import java.io.IOException;
 
 public class CodeGeneration {
 
+    private static final Logger log = LoggerFactory.getLogger(CodeGeneration.class);
     private final StringBuilder output = new StringBuilder();
     private final StringBuilder function = new StringBuilder();
     private int counterForIf;
@@ -43,6 +47,8 @@ public class CodeGeneration {
                 case ForNode forNode -> processFor(forNode);
                 default -> throw new IllegalArgumentException("Unsupported AST node type");
             }
+        } else {
+            log.debug("Process null node");
         }
 
     }
@@ -50,12 +56,16 @@ public class CodeGeneration {
     private void processTerminal(TerminalAstNode node) {
         String name = node.getName();
         if (isNumeric(name)) {
+            log.debug("Process numeric node {}: {}", name, node);
             output.append("push N").append(name).append("\n");
         } else if (isDouble(name)) {
+            log.debug("Process double node {}: {}", name, node);
             output.append("push D").append(name).append("\n");
         } else if (isBoolean(name)) {
+            log.debug("Process boolean node {}: {}", name, node);
             output.append("push B").append(name).append("\n");
         } else if (isStringLiteral(name)) {
+            log.debug("Process string literal node {}: {}", name, node);
             output.append("push \"").append(name).append("\"\n");
         } else {
             output.append("push \"").append(name).append("\"\n").append("load\n");
@@ -65,12 +75,14 @@ public class CodeGeneration {
 
 
     private void processProgram(ProgramNode node) {
+        log.debug("Process program node: {}", node);
         for (AstNode child : node.children) {
             processNode(child);
         }
     }
 
     private void processBlock(BlockNode node) {
+        log.debug("Process block node: {}", node);
         for (AstNode child : node.children) {
             processNode(child);
         }
@@ -79,10 +91,12 @@ public class CodeGeneration {
     private void processBinOp(BinOpNode node) {
         if (node.getName().equals("var")){
             processNode(node.getChild(1));
+            log.debug("Process binop var node");
             output.append("push \"").append(node.getChild(0).getName()).append("\"\n").append("SET\n");
         } else {
             processNode(node.getChild(0));
             processNode(node.getChild(1));
+            log.debug("Process binop {} node", node.getName());
             String operator = switch (node.getName()) {
                 case "+" -> "add";
                 case "-" -> "sub";
@@ -95,7 +109,11 @@ public class CodeGeneration {
                 case ">=" -> "gte";
                 case "<" -> "lt";
                 case "<=" -> "lte";
-                default -> throw new RuntimeException("Unknown binop");
+                default -> {
+                    var e = new RuntimeException("Unknown binary operation");
+                    log.error(e.getMessage(), e);
+                    throw e;
+                }
             };
             output.append(operator).append("\n");
         }
@@ -104,16 +122,22 @@ public class CodeGeneration {
 
     private void processUnaryOp(UnaryOpNode node) {
         processNode(node.getChild(0));
+        log.debug("Process unary op node {}", node.getName());
         String operator = switch (node.getName()) {
             case "-" -> "neg";
             case "!" -> "not";
-            default -> throw new RuntimeException("Unknown unop");
+            default -> {
+                var e = new RuntimeException("Unknown unary operation");
+                log.error(e.getMessage(), e);
+                throw e;
+            }
         };
         output.append(operator).append("\n");
     }
 
     private void processObjectCall(ObjectCallNode node) {
         processNode(node.getChild(1));
+        log.debug("Process object call node");
         output.append("push \"").append(node.getChild(0).getName()).append("\"\n").append("load\n")
                 .append("getfield\n");
     }
@@ -121,6 +145,7 @@ public class CodeGeneration {
     private void processArrayCall(ArrayCallNode node) {
         processNode(node.getChild(0));
         processNode(node.getChild(1));
+        log.debug("Process array call node");
         output.append("aload\n");
     }
 
@@ -137,6 +162,7 @@ public class CodeGeneration {
             output.append("aset\n");
         }
         processNode(node.getChild(0));
+        log.debug("Process function call node");
         output.append("callfunc\n");
     }
 
@@ -149,6 +175,7 @@ public class CodeGeneration {
             output.append("push N").append(i - 1).append("\naload\n");
             output.append("push \"").append(node.getChild(i).getName()).append("\"\nset\n");
         }
+        log.debug("Process function definition node");
         processNode(node.getChild(node.getChildrenAmount() - 1));
     }
 
@@ -157,9 +184,11 @@ public class CodeGeneration {
         for (AstNode child : node.children) {
             processNode(child);
         }
+        log.debug("Process object literal node");
     }
 
     private void processArrayLiteral(ArrayLiteralNode node) {
+        log.debug("Process array literal node");
         output.append("newarray\n");
         for (int i = 0; i < node.getChildrenAmount(); i++) {
             output.append("dup\n");
@@ -172,11 +201,13 @@ public class CodeGeneration {
     private void processField(FieldNode node) {
         processNode(node.getChild(1));
         processNode(node.getChild(0));
+        log.debug("Process field node");
         output.append("load\n").append("setfield").append(node.getChild(0).getName()).append("\n");
     }
 
     private void processReturn(ReturnNode node) {
         processNode(node.getChild(0));
+        log.debug("Process return node");
         output.append("return\n");
     }
 
@@ -193,10 +224,12 @@ public class CodeGeneration {
             output.append("aset\n");
         }
         processNode(node.getChild(1));
+        log.debug("Process assign node");
         output.append("push \"").append(node.getChild(0).getName()).append("\"\n").append("set\n");
     }
 
     private void processWhile(WhileNode node) {
+        log.debug("Process while node");
         processNode(node.getChild(0));
         output.append("jmf end_while").append(counterForWhile).append("\n");
         processNode(node.getChild(1));
@@ -204,10 +237,12 @@ public class CodeGeneration {
     }
 
     private void processElse(ElseNode node) {
+        log.debug("Process else node");
         processNode(node.getChild(0));
     }
 
     private void processElif(ElifNode node) {
+        log.debug("Process elif node");
         int elif = counterForElif;
         counterForElif++;
         processNode(node.getChild(0));
@@ -217,6 +252,7 @@ public class CodeGeneration {
     }
 
     private void processIf(IfNode node) {
+        log.debug("Process if node");
         int endIf = counterForIf;
         counterForIf++;
         processNode(node.getChild(0));
@@ -230,6 +266,7 @@ public class CodeGeneration {
     }
 
     private void processFor(ForNode node) {
+        log.debug("Process for node");
         processNode(node.getChild(0));
         output.append("#for").append(counterForFor).append("\n");
         processNode(node.getChild(1));

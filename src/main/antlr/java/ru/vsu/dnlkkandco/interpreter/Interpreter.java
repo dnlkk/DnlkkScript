@@ -1,5 +1,7 @@
 package ru.vsu.dnlkkandco.interpreter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vsu.dnlkkandco.interpreter.value.*;
 
 import java.io.BufferedReader;
@@ -10,6 +12,8 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Interpreter {
+    private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
+
     public static void main(String[] args) throws IOException {
         Path source = Path.of(args[0]);
         Interpreter interpreter = new Interpreter(source);
@@ -54,20 +58,31 @@ public class Interpreter {
         // processor register
         int ip = labels.get("main");
 
-
+        log.info("Start interpreting from {}", source);
         while (ip != -1 && ip < commands.size()) {
             InterpreterCommand command = commands.get(ip++);
             try {
                 switch (command.command()) {
-                    case CommandType.POP -> stack.pop();
-                    case CommandType.PUSH -> stack.push(command.argument());
-                    case CommandType.DUP -> stack.push(stack.peek());
+                    case CommandType.POP -> {
+                        log.debug("Executing pop command");
+                        stack.pop();
+                    }
+                    case CommandType.PUSH -> {
+                        log.debug("Executing push command");
+                        stack.push(command.argument());
+                    }
+                    case CommandType.DUP -> {
+                        log.debug("Executing dup command");
+                        stack.push(stack.peek());
+                    }
                     case CommandType.SET -> {
+                        log.debug("Executing set command");
                         StringValue var = stack.pop().asString();
                         Value<?> argument = stack.pop();
                         context.setVariable(var.getValue(), argument);
                     }
                     case CommandType.LOAD -> {
+                        log.debug("Executing load command");
                         StringValue var = stack.pop().asString();
                         Value<?> val = context.get(var.getValue());
                         stack.push(val);
@@ -75,6 +90,7 @@ public class Interpreter {
                     case CommandType.ADD, CommandType.SUB, CommandType.MUL, CommandType.DIV, CommandType.MOD,
                          CommandType.EQ, CommandType.NEQ, CommandType.GT, CommandType.GTE, CommandType.LT,
                          CommandType.LTE -> {
+                        log.debug("Executing binary {} command", command.command().name().toLowerCase());
                         Value<?> val1 = stack.pop();
                         Value<?> val2 = stack.pop();
                         Value<?> result = Operation.binaryImplementation
@@ -83,6 +99,7 @@ public class Interpreter {
                         stack.push(result);
                     }
                     case CommandType.NEG, CommandType.NOT -> {
+                        log.debug("Executing unary {} command", command.command().name().toLowerCase());
                         Value<?> val = stack.pop();
                         Value<?> result = Operation.unaryImplementation
                                 .get(Operation.Unary.valueOf(command.command().toString()))
@@ -90,6 +107,7 @@ public class Interpreter {
                         stack.push(result);
                     }
                     case CommandType.JMF, CommandType.JMT -> {
+                        log.debug("Executing conditional jump {} command", command.command().name().toLowerCase());
                         Value<?> val = stack.pop();
                         if (val.getType() != ValueType.BOOL) {
                             throw new RuntimeException("Illegal value '" + val + "'");
@@ -99,32 +117,46 @@ public class Interpreter {
                             ip = labels.get(getAsLabel(command.argument().asString().getValue()));
                         }
                     }
-                    case CommandType.JMP -> ip = labels.get(getAsLabel(command.argument().asString().getValue()));
-                    case CommandType.NEWARRAY -> stack.push(new ArrayValue(new ArrayList<>()));
+                    case CommandType.JMP -> {
+                        log.debug("Executing jmp command");
+                        ip = labels.get(getAsLabel(command.argument().asString().getValue()));
+                    }
+                    case CommandType.NEWARRAY -> {
+                        log.debug("Executing newarray command");
+                        stack.push(new ArrayValue(new ArrayList<>()));
+                    }
                     case CommandType.ASET -> {
+                        log.debug("Executing aset command");
                         Value<?> value = stack.pop();
                         int index = stack.pop().asNum().getValue();
                         ArrayValue array = stack.pop().asArray();
                         array.set(index, value);
                     }
                     case CommandType.ALOAD -> {
+                        log.debug("Executing aload command");
                         int index = stack.pop().asNum().getValue();
                         ArrayValue array = stack.pop().asArray();
                         stack.push(array.get(index));
                     }
-                    case CommandType.NEWOBJECT -> stack.push(new ObjectValue(new HashMap<>()));
+                    case CommandType.NEWOBJECT -> {
+                        log.debug("Executing newobject command");
+                        stack.push(new ObjectValue(new HashMap<>()));
+                    }
                     case CommandType.SETFIELD -> {
+                        log.debug("Executing setfield command");
                         Value<?> value = stack.pop();
                         String fieldName = stack.pop().asString().getValue();
                         ObjectValue object = stack.pop().asObject();
                         object.put(fieldName, value);
                     }
                     case CommandType.GETFIELD -> {
+                        log.debug("Executing getfield command");
                         String fieldName = stack.pop().asString().getValue();
                         ObjectValue object = stack.pop().asObject();
                         stack.push(object.get(fieldName));
                     }
                     case CommandType.NEWFUNC -> {
+                        log.debug("Executing newfunc command");
                         String label = stack.pop().asString().getValue();
                         FunctionValue function = new FunctionValue(label);
                         stack.push(function);
@@ -136,31 +168,39 @@ public class Interpreter {
 
                         switch (callable) {
                             case FunctionValue function -> {
+                                log.debug("Executing callfunc command (function)");
                                 ipStack.push(ip);
                                 context.setVariable("__args__", args);
                                 ip = labels.get(getAsLabel(function.getCodeBodyLabel()));
                             }
-                            case SysCall sysCall -> sysCall.getValue().accept(args, stack);
-                            default -> throw new RuntimeException("Illegal call '" + callable + "'");
+                            case SysCall sysCall -> {
+                                log.debug("Executing callfunc command (syscall)");
+                                sysCall.getValue().accept(args, stack);
+                            }
+                            default -> {
+                                var e = new RuntimeException("Illegal call '" + callable + "'");
+                                log.error(e.getMessage(), e);
+                                throw e;
+                            }
                         }
 
                     }
                     case CommandType.RETURN -> {
+                        log.debug("Executing return command");
                         context = context.getParent();
                         ip = ipStack.pop();
                     }
-                    case CommandType.HALT -> ip = -1;
+                    case CommandType.HALT -> {
+                        log.debug("Executing halt command");
+                        ip = -1;
+                    }
                 }
             } catch (Exception e) {
-                System.err.println("Error on line: " + command.lineNumber());
-                System.err.println(e.getMessage());
-                e.printStackTrace();
+                log.error("Error on line: {}", command.lineNumber(), e);
                 break;
             }
         }
-
-        // todo: to remove
-//        System.out.println(stack.peek());
+        log.info("End interpreting from {}", source);
     }
 
     private void initSycCalls() {
@@ -250,6 +290,7 @@ public class Interpreter {
     }
 
     private void preprocess() throws IOException {
+        log.debug("Preprocessing");
         try (BufferedReader reader = new BufferedReader(new FileReader(source.toFile()))) {
             String line;
             int lineNumber = 0;
@@ -261,11 +302,15 @@ public class Interpreter {
                 if (line.startsWith(LABEL_MARKER)) {
                     String label = line.substring(1);
                     if (label.isEmpty()) {
-                        throw new LabelIsEmptyException("Empty label");
+                        var e = new LabelIsEmptyException("Empty label");
+                        log.error(e.getMessage(), e);
+                        throw e;
                     }
 
                     if (labels.containsKey(label)) {
-                        throw new DuplicateLabelException("Duplicate label: " + label + " on line " + lineNumber);
+                        var e = new DuplicateLabelException("Duplicate label: " + label + " on line " + lineNumber);
+                        log.error(e.getMessage(), e);
+                        throw e;
                     }
 
                     labels.put(label, commands.size());
@@ -282,7 +327,9 @@ public class Interpreter {
             }
 
             if (!labels.containsKey("main")) {
-                throw new NoMainLabelException("No main label");
+                var e = new NoMainLabelException("No main label");
+                log.error(e.getMessage(), e);
+                throw e;
             }
 
             preprocessed = true;
