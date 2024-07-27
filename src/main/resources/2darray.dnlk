@@ -1,0 +1,25 @@
+#main
+    newarray
+    push "array"
+    set
+
+    newarray
+    push N0
+    push "array"
+    load
+    aset
+
+    push "hello world"
+    push N0
+    push N0
+    push "array"
+    load
+    aload
+    aset
+
+    push N0
+    push N0
+    push "array"
+    load
+    aload
+    aload

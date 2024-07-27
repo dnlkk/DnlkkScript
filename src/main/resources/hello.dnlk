@@ -1,0 +1,40 @@
+#main
+    newarray
+
+    dup
+    push N0
+    push "Введите ваше имя:"
+    aset
+
+    push "iout"
+    load
+    push "out"
+    getfield
+    callfunc
+
+    newarray
+    push "iout"
+    load
+    push "in"
+    getfield
+    callfunc
+
+    push "name"
+    set
+
+    newarray
+    dup
+
+    push N0
+    push "name"
+    load
+    push "Здравствуйте, "
+    add
+
+    aset
+
+    push "iout"
+    load
+    push "out"
+    getfield
+    callfunc
