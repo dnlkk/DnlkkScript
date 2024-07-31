@@ -29,7 +29,7 @@ public class Interpreter {
         this.commands = commands;
     }
 
-    public void exec() throws IOException {
+    public void exec() {
         initSycCalls();
         int currentCommandIndex = labels.get("main");
         while (currentCommandIndex != -1 && currentCommandIndex < commands.size()) {
@@ -173,6 +173,26 @@ public class Interpreter {
                 break;
             }
         }
+    }
+
+    public Map<String, Integer> getLabels() {
+        return labels;
+    }
+
+    public List<InterpreterCommand> getCommands() {
+        return commands;
+    }
+
+    public Deque<Value<?>> getStack() {
+        return stack;
+    }
+
+    public Deque<Integer> getReturnPoints() {
+        return returnPoints;
+    }
+
+    public Context getContext() {
+        return context;
     }
 
     private void initSycCalls() {
