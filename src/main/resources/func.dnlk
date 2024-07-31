@@ -1,5 +1,5 @@
 #main
-    push "#foo"
+    push "foo"
     newfunc
 
     push "bar"

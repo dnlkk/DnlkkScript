@@ -14,51 +14,31 @@ import java.util.*;
 public class Interpreter {
     private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
 
-    public static void main(String[] args) throws IOException {
-        Path source = Path.of(args[0]);
-        Interpreter interpreter = new Interpreter(source);
-        interpreter.exec();
-    }
-
-    private static final String LABEL_MARKER = "#";
-    private static final String NULL_MARKER = "!";
-    private static final String UNDEFINED_MARKER = "$";
-    private static final String NUM_MARKER = "N";
-    private static final String DOUBLE_MARKER = "D";
-    private static final String BOOL_MARKER = "B";
-
     private static final Scanner STDIN = new Scanner(System.in);
     private static final PrintStream STDOUT = System.out;
 
-    private final Path source;
     private final Map<String, Integer> labels;
     private final List<InterpreterCommand> commands;
-    private boolean preprocessed = false;
-    private final Deque<Value<?>> stack;
-    private final Deque<Integer> ipStack;
+    private final Deque<Value<?>> stack = new ArrayDeque<>();
+    private final Deque<Integer> ipStack = new ArrayDeque<>();
+
     private Context context = new Context(null);
 
-    public Interpreter(Path source) {
-        this.source = source;
-        labels = new HashMap<>();
-        commands = new ArrayList<>();
-        stack = new ArrayDeque<>();
-        ipStack = new ArrayDeque<>();
+    public Interpreter(
+            Map<String, Integer> labels,
+            List<InterpreterCommand> commands
+    ) {
+        this.labels = labels;
+        this.commands = commands;
     }
 
     public void exec() throws IOException {
-        if (!preprocessed) {
-            // добавить обработку исключений
-            preprocess();
-        }
-
         initSycCalls();
 
         assert labels.containsKey("main");
         // processor register
         int ip = labels.get("main");
 
-        log.info("Start interpreting from {}", source);
         while (ip != -1 && ip < commands.size()) {
             InterpreterCommand command = commands.get(ip++);
             try {
@@ -114,12 +94,12 @@ public class Interpreter {
                         }
                         boolean jump = command.command().equals(CommandType.JMT) == val.asBool().getValue();
                         if (jump) {
-                            ip = labels.get(getAsLabel(command.argument().asString().getValue()));
+                            ip = labels.get(command.argument().asString().getValue());
                         }
                     }
                     case CommandType.JMP -> {
                         log.debug("Executing jmp command");
-                        ip = labels.get(getAsLabel(command.argument().asString().getValue()));
+                        ip = labels.get(command.argument().asString().getValue());
                     }
                     case CommandType.NEWARRAY -> {
                         log.debug("Executing newarray command");
@@ -171,7 +151,7 @@ public class Interpreter {
                                 log.debug("Executing callfunc command (function)");
                                 ipStack.push(ip);
                                 context.setVariable("__args__", args);
-                                ip = labels.get(getAsLabel(function.getCodeBodyLabel()));
+                                ip = labels.get(function.getCodeBodyLabel());
                             }
                             case SysCall sysCall -> {
                                 log.debug("Executing callfunc command (syscall)");
@@ -200,7 +180,6 @@ public class Interpreter {
                 break;
             }
         }
-        log.info("End interpreting from {}", source);
     }
 
     private void initSycCalls() {
@@ -271,105 +250,10 @@ public class Interpreter {
         )
         ));
         context.setVariable("credentials", new SysCall((_, _) -> {
-            System.out.println("=== Авторы сего недоразумения! ===");
-            System.out.println("Человек, который решил что знает ассемблер: Путин Павел");
-            System.out.println("Frontender, нашедший способ писать на js даже компиляторы: Шлыков Данила");
-            System.out.println("Кодогенератор во плоти, пожалуйста: Евгений Саков");
+            STDOUT.println("=== Авторы сего недоразумения! ===");
+            STDOUT.println("Человек, который решил что знает ассемблер: Путин Павел");
+            STDOUT.println("Frontender, нашедший способ писать на js даже компиляторы: Шлыков Данила");
+            STDOUT.println("Кодогенератор во плоти, пожалуйста: Евгений Саков");
         }));
-    }
-
-    private String getAsLabel(String label) {
-        if (!label.startsWith(LABEL_MARKER)) {
-            throw new RuntimeException("Illegal label '" + label + "'");
-        }
-        label = label.substring(1);
-        if (!labels.containsKey(label)) {
-            throw new RuntimeException("Illegal label '" + label + "'");
-        }
-        return label;
-    }
-
-    private void preprocess() throws IOException {
-        log.debug("Preprocessing");
-        try (BufferedReader reader = new BufferedReader(new FileReader(source.toFile()))) {
-            String line;
-            int lineNumber = 0;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                lineNumber++;
-                if (line.isBlank()) continue;
-
-                if (line.startsWith(LABEL_MARKER)) {
-                    String label = line.substring(1);
-                    if (label.isEmpty()) {
-                        var e = new LabelIsEmptyException("Empty label");
-                        log.error(e.getMessage(), e);
-                        throw e;
-                    }
-
-                    if (labels.containsKey(label)) {
-                        var e = new DuplicateLabelException("Duplicate label: " + label + " on line " + lineNumber);
-                        log.error(e.getMessage(), e);
-                        throw e;
-                    }
-
-                    labels.put(label, commands.size());
-                } else {
-                    int delimiterIndex = line.indexOf(" ");
-                    if (delimiterIndex == -1) {
-                        commands.add(new InterpreterCommand(CommandType.valueOf(line.toUpperCase()), null, lineNumber));
-                    } else {
-                        String operation = line.substring(0, delimiterIndex);
-                        String argument = line.substring(delimiterIndex + 1);
-                        commands.add(new InterpreterCommand(CommandType.valueOf(operation.toUpperCase()), argumentToValue(argument), lineNumber));
-                    }
-                }
-            }
-
-            if (!labels.containsKey("main")) {
-                var e = new NoMainLabelException("No main label");
-                log.error(e.getMessage(), e);
-                throw e;
-            }
-
-            preprocessed = true;
-        }
-    }
-
-    private Value<?> argumentToValue(String argument) {
-        if (argument.startsWith("\"") && argument.endsWith("\"")) {
-            argument = argument.substring(1, argument.length() - 1);
-            return new StringValue(argument);
-        } else {
-            String marker = argument.substring(0, 1);
-            argument = argument.substring(1);
-
-            return switch (marker) {
-                case NULL_MARKER -> new NullValue();
-                case UNDEFINED_MARKER -> new UndefinedValue();
-                case NUM_MARKER -> new NumValue(Integer.parseInt(argument));
-                case DOUBLE_MARKER -> new DoubleValue(Double.parseDouble(argument));
-                case BOOL_MARKER -> new BoolValue(Boolean.parseBoolean(argument));
-                default -> throw new IllegalStateException("Unexpected value: " + marker);
-            };
-        }
-    }
-
-    private static class LabelIsEmptyException extends RuntimeException {
-        public LabelIsEmptyException(String label) {
-            super(label);
-        }
-    }
-
-    private static class DuplicateLabelException extends RuntimeException {
-        public DuplicateLabelException(String label) {
-            super(label);
-        }
-    }
-
-    private static class NoMainLabelException extends RuntimeException {
-        public NoMainLabelException(String label) {
-            super(label);
-        }
     }
 }
