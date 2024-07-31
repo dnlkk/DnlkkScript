@@ -4,11 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vsu.dnlkkandco.interpreter.value.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Path;
 import java.util.*;
 
 public class Interpreter {
@@ -20,7 +17,7 @@ public class Interpreter {
     private final Map<String, Integer> labels;
     private final List<InterpreterCommand> commands;
     private final Deque<Value<?>> stack = new ArrayDeque<>();
-    private final Deque<Integer> ipStack = new ArrayDeque<>();
+    private final Deque<Integer> returnPoints = new ArrayDeque<>();
 
     private Context context = new Context(null);
 
@@ -34,13 +31,9 @@ public class Interpreter {
 
     public void exec() throws IOException {
         initSycCalls();
-
-        assert labels.containsKey("main");
-        // processor register
-        int ip = labels.get("main");
-
-        while (ip != -1 && ip < commands.size()) {
-            InterpreterCommand command = commands.get(ip++);
+        int currentCommandIndex = labels.get("main");
+        while (currentCommandIndex != -1 && currentCommandIndex < commands.size()) {
+            InterpreterCommand command = commands.get(currentCommandIndex++);
             try {
                 switch (command.command()) {
                     case CommandType.POP -> {
@@ -94,12 +87,12 @@ public class Interpreter {
                         }
                         boolean jump = command.command().equals(CommandType.JMT) == val.asBool().getValue();
                         if (jump) {
-                            ip = labels.get(command.argument().asString().getValue());
+                            currentCommandIndex = labels.get(command.argument().asString().getValue());
                         }
                     }
                     case CommandType.JMP -> {
                         log.debug("Executing jmp command");
-                        ip = labels.get(command.argument().asString().getValue());
+                        currentCommandIndex = labels.get(command.argument().asString().getValue());
                     }
                     case CommandType.NEWARRAY -> {
                         log.debug("Executing newarray command");
@@ -149,9 +142,9 @@ public class Interpreter {
                         switch (callable) {
                             case FunctionValue function -> {
                                 log.debug("Executing callfunc command (function)");
-                                ipStack.push(ip);
+                                returnPoints.push(currentCommandIndex);
                                 context.setVariable("__args__", args);
-                                ip = labels.get(function.getCodeBodyLabel());
+                                currentCommandIndex = labels.get(function.getCodeBodyLabel());
                             }
                             case SysCall sysCall -> {
                                 log.debug("Executing callfunc command (syscall)");
@@ -168,11 +161,11 @@ public class Interpreter {
                     case CommandType.RETURN -> {
                         log.debug("Executing return command");
                         context = context.getParent();
-                        ip = ipStack.pop();
+                        currentCommandIndex = returnPoints.pop();
                     }
                     case CommandType.HALT -> {
                         log.debug("Executing halt command");
-                        ip = -1;
+                        currentCommandIndex = -1;
                     }
                 }
             } catch (Exception e) {
