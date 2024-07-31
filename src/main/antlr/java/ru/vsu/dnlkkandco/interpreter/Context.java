@@ -53,4 +53,17 @@ public class Context implements Iterable<Context> {
             }
         };
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Context context = (Context) o;
+        return Objects.equals(parent, context.parent) && Objects.equals(variables, context.variables);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(parent, variables);
+    }
 }

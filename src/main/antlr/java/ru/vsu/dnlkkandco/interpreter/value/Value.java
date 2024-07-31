@@ -2,6 +2,8 @@ package ru.vsu.dnlkkandco.interpreter.value;
 
 import ru.vsu.dnlkkandco.interpreter.ValueType;
 
+import java.util.Objects;
+
 public abstract class Value<T> {
     private final T value;
 
@@ -23,4 +25,17 @@ public abstract class Value<T> {
     public FunctionValue asFunction() {throw new UnsupportedOperationException("Cannot convert to FunctionValue");}
     public ArrayValue asArray() {throw new UnsupportedOperationException("Cannot convert to ArrayValue");}
     public ObjectValue asObject() {throw new UnsupportedOperationException("Cannot convert to ObjectValue");}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Value<?> value1 = (Value<?>) o;
+        return Objects.equals(value, value1.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value);
+    }
 }
