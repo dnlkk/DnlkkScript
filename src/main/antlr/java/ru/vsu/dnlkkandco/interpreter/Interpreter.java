@@ -18,6 +18,7 @@ public class Interpreter {
     private final List<InterpreterCommand> commands;
     private final Deque<Value<?>> stack = new ArrayDeque<>();
     private final Deque<Integer> returnPoints = new ArrayDeque<>();
+    private int currentCommandIndex = -1;
 
     private Context context = new Context(null);
 
@@ -31,142 +32,32 @@ public class Interpreter {
 
     public void exec() {
         initSycCalls();
-        int currentCommandIndex = labels.get("main");
+        currentCommandIndex = labels.get("main");
         while (currentCommandIndex != -1 && currentCommandIndex < commands.size()) {
             InterpreterCommand command = commands.get(currentCommandIndex++);
             try {
                 switch (command.command()) {
-                    case CommandType.POP -> {
-                        log.debug("Executing pop command");
-                        stack.pop();
-                    }
-                    case CommandType.PUSH -> {
-                        log.debug("Executing push command");
-                        stack.push(command.argument());
-                    }
-                    case CommandType.DUP -> {
-                        log.debug("Executing dup command");
-                        stack.push(stack.peek());
-                    }
-                    case CommandType.SET -> {
-                        log.debug("Executing set command");
-                        StringValue var = stack.pop().asString();
-                        Value<?> argument = stack.pop();
-                        context.setVariable(var.getValue(), argument);
-                    }
-                    case CommandType.LOAD -> {
-                        log.debug("Executing load command");
-                        StringValue var = stack.pop().asString();
-                        Value<?> val = context.get(var.getValue());
-                        stack.push(val);
-                    }
+                    case CommandType.POP -> processPop();
+                    case CommandType.PUSH -> processPush(command);
+                    case CommandType.DUP -> processDup();
+                    case CommandType.SET -> processSet();
+                    case CommandType.LOAD -> processLoad();
                     case CommandType.ADD, CommandType.SUB, CommandType.MUL, CommandType.DIV, CommandType.MOD,
                          CommandType.EQ, CommandType.NEQ, CommandType.GT, CommandType.GTE, CommandType.LT,
-                         CommandType.LTE -> {
-                        log.debug("Executing binary {} command", command.command().name().toLowerCase());
-                        Value<?> val1 = stack.pop();
-                        Value<?> val2 = stack.pop();
-                        Value<?> result = Operation.binaryImplementation
-                                .get(Operation.Binary.valueOf(command.command().toString()))
-                                .get(val1.getType()).apply(val1, val2);
-                        stack.push(result);
-                    }
-                    case CommandType.NEG, CommandType.NOT -> {
-                        log.debug("Executing unary {} command", command.command().name().toLowerCase());
-                        Value<?> val = stack.pop();
-                        Value<?> result = Operation.unaryImplementation
-                                .get(Operation.Unary.valueOf(command.command().toString()))
-                                .get(val.getType()).apply(val);
-                        stack.push(result);
-                    }
-                    case CommandType.JMF, CommandType.JMT -> {
-                        log.debug("Executing conditional jump {} command", command.command().name().toLowerCase());
-                        Value<?> val = stack.pop();
-                        if (val.getType() != ValueType.BOOL) {
-                            throw new RuntimeException("Illegal value '" + val + "'");
-                        }
-                        boolean jump = command.command().equals(CommandType.JMT) == val.asBool().getValue();
-                        if (jump) {
-                            currentCommandIndex = labels.get(command.argument().asString().getValue());
-                        }
-                    }
-                    case CommandType.JMP -> {
-                        log.debug("Executing jmp command");
-                        currentCommandIndex = labels.get(command.argument().asString().getValue());
-                    }
-                    case CommandType.NEWARRAY -> {
-                        log.debug("Executing newarray command");
-                        stack.push(new ArrayValue(new ArrayList<>()));
-                    }
-                    case CommandType.ASET -> {
-                        log.debug("Executing aset command");
-                        Value<?> value = stack.pop();
-                        int index = stack.pop().asNum().getValue();
-                        ArrayValue array = stack.pop().asArray();
-                        array.set(index, value);
-                    }
-                    case CommandType.ALOAD -> {
-                        log.debug("Executing aload command");
-                        int index = stack.pop().asNum().getValue();
-                        ArrayValue array = stack.pop().asArray();
-                        stack.push(array.get(index));
-                    }
-                    case CommandType.NEWOBJECT -> {
-                        log.debug("Executing newobject command");
-                        stack.push(new ObjectValue(new HashMap<>()));
-                    }
-                    case CommandType.SETFIELD -> {
-                        log.debug("Executing setfield command");
-                        Value<?> value = stack.pop();
-                        String fieldName = stack.pop().asString().getValue();
-                        ObjectValue object = stack.pop().asObject();
-                        object.put(fieldName, value);
-                    }
-                    case CommandType.GETFIELD -> {
-                        log.debug("Executing getfield command");
-                        String fieldName = stack.pop().asString().getValue();
-                        ObjectValue object = stack.pop().asObject();
-                        stack.push(object.get(fieldName));
-                    }
-                    case CommandType.NEWFUNC -> {
-                        log.debug("Executing newfunc command");
-                        String label = stack.pop().asString().getValue();
-                        FunctionValue function = new FunctionValue(label);
-                        stack.push(function);
-                    }
-                    case CommandType.CALLFUNC -> {
-                        Value<?> callable = stack.pop();
-                        context = new Context(context);
-                        ArrayValue args = stack.pop().asArray();
-
-                        switch (callable) {
-                            case FunctionValue function -> {
-                                log.debug("Executing callfunc command (function)");
-                                returnPoints.push(currentCommandIndex);
-                                context.setVariable("__args__", args);
-                                currentCommandIndex = labels.get(function.getCodeBodyLabel());
-                            }
-                            case SysCall sysCall -> {
-                                log.debug("Executing callfunc command (syscall)");
-                                sysCall.getValue().accept(args, stack);
-                            }
-                            default -> {
-                                var e = new RuntimeException("Illegal call '" + callable + "'");
-                                log.error(e.getMessage(), e);
-                                throw e;
-                            }
-                        }
-
-                    }
-                    case CommandType.RETURN -> {
-                        log.debug("Executing return command");
-                        context = context.getParent();
-                        currentCommandIndex = returnPoints.pop();
-                    }
-                    case CommandType.HALT -> {
-                        log.debug("Executing halt command");
-                        currentCommandIndex = -1;
-                    }
+                         CommandType.LTE -> processBinaryOperation(command);
+                    case CommandType.NEG, CommandType.NOT -> processUnaryOperation(command);
+                    case CommandType.JMF, CommandType.JMT -> processConditinalJump(command);
+                    case CommandType.JMP -> processJump(command);
+                    case CommandType.NEWARRAY -> processNewArray();
+                    case CommandType.ASET -> processArraySet();
+                    case CommandType.ALOAD -> processArrayLoad();
+                    case CommandType.NEWOBJECT -> processNewObject();
+                    case CommandType.SETFIELD -> processSetField();
+                    case CommandType.GETFIELD -> processGetField();
+                    case CommandType.NEWFUNC -> processNewFunction();
+                    case CommandType.CALLFUNC -> processCallFunction();
+                    case CommandType.RETURN -> processReturn();
+                    case CommandType.HALT -> processHalt();
                 }
             } catch (Exception e) {
                 log.error("Error on line: {}", command.lineNumber(), e);
@@ -268,5 +159,152 @@ public class Interpreter {
             STDOUT.println("Frontender, нашедший способ писать на js даже компиляторы: Шлыков Данила");
             STDOUT.println("Кодогенератор во плоти, пожалуйста: Евгений Саков");
         }));
+    }
+
+    private void processHalt() {
+        log.debug("Executing halt command");
+        currentCommandIndex = -1;
+    }
+
+    private void processReturn() {
+        log.debug("Executing return command");
+        context = context.getParent();
+        currentCommandIndex = returnPoints.pop();
+    }
+
+    private void processCallFunction() {
+        Value<?> callable = stack.pop();
+        context = new Context(context);
+        ArrayValue args = stack.pop().asArray();
+
+        switch (callable) {
+            case FunctionValue function -> {
+                log.debug("Executing callfunc command (function)");
+                returnPoints.push(currentCommandIndex);
+                context.setVariable("__args__", args);
+                currentCommandIndex = labels.get(function.getCodeBodyLabel());
+            }
+            case SysCall sysCall -> {
+                log.debug("Executing callfunc command (syscall)");
+                sysCall.getValue().accept(args, stack);
+            }
+            default -> {
+                var e = new RuntimeException("Illegal call '" + callable + "'");
+                log.error(e.getMessage(), e);
+                throw e;
+            }
+        }
+    }
+
+    private void processNewFunction() {
+        log.debug("Executing newfunc command");
+        String label = stack.pop().asString().getValue();
+        FunctionValue function = new FunctionValue(label);
+        stack.push(function);
+    }
+
+    private void processGetField() {
+        log.debug("Executing getfield command");
+        String fieldName = stack.pop().asString().getValue();
+        ObjectValue object = stack.pop().asObject();
+        stack.push(object.get(fieldName));
+    }
+
+    private void processSetField() {
+        log.debug("Executing setfield command");
+        Value<?> value = stack.pop();
+        String fieldName = stack.pop().asString().getValue();
+        ObjectValue object = stack.pop().asObject();
+        object.put(fieldName, value);
+    }
+
+    private void processNewObject() {
+        log.debug("Executing newobject command");
+        stack.push(new ObjectValue(new HashMap<>()));
+    }
+
+    private void processArrayLoad() {
+        log.debug("Executing aload command");
+        int index = stack.pop().asNum().getValue();
+        ArrayValue array = stack.pop().asArray();
+        stack.push(array.get(index));
+    }
+
+    private void processArraySet() {
+        log.debug("Executing aset command");
+        Value<?> value = stack.pop();
+        int index = stack.pop().asNum().getValue();
+        ArrayValue array = stack.pop().asArray();
+        array.set(index, value);
+    }
+
+    private void processNewArray() {
+        log.debug("Executing newarray command");
+        stack.push(new ArrayValue(new ArrayList<>()));
+    }
+
+    private void processJump(InterpreterCommand command) {
+        log.debug("Executing jmp command");
+        currentCommandIndex = labels.get(command.argument().asString().getValue());
+    }
+
+    private void processConditinalJump(InterpreterCommand command) {
+        log.debug("Executing conditional jump {} command", command.command().name().toLowerCase());
+        Value<?> val = stack.pop();
+        if (val.getType() != ValueType.BOOL) {
+            throw new RuntimeException("Illegal value '" + val + "'");
+        }
+        boolean jump = command.command().equals(CommandType.JMT) == val.asBool().getValue();
+        if (jump) {
+            currentCommandIndex = labels.get(command.argument().asString().getValue());
+        }
+    }
+
+    private void processUnaryOperation(InterpreterCommand command) {
+        log.debug("Executing unary {} command", command.command().name().toLowerCase());
+        Value<?> val = stack.pop();
+        Value<?> result = Operation.unaryImplementation
+                .get(Operation.Unary.valueOf(command.command().toString()))
+                .get(val.getType()).apply(val);
+        stack.push(result);
+    }
+
+    private void processBinaryOperation(InterpreterCommand command) {
+        log.debug("Executing binary {} command", command.command().name().toLowerCase());
+        Value<?> val1 = stack.pop();
+        Value<?> val2 = stack.pop();
+        Value<?> result = Operation.binaryImplementation
+                .get(Operation.Binary.valueOf(command.command().toString()))
+                .get(val1.getType()).apply(val1, val2);
+        stack.push(result);
+    }
+
+    private void processLoad() {
+        log.debug("Executing load command");
+        StringValue var = stack.pop().asString();
+        Value<?> val = context.get(var.getValue());
+        stack.push(val);
+    }
+
+    private void processSet() {
+        log.debug("Executing set command");
+        StringValue var = stack.pop().asString();
+        Value<?> argument = stack.pop();
+        context.setVariable(var.getValue(), argument);
+    }
+
+    private void processDup() {
+        log.debug("Executing dup command");
+        stack.push(stack.peek());
+    }
+
+    private void processPush(InterpreterCommand command) {
+        log.debug("Executing push command");
+        stack.push(command.argument());
+    }
+
+    private void processPop() {
+        log.debug("Executing pop command");
+        stack.pop();
     }
 }
